@@ -236,7 +236,7 @@ public class DisplayController{
         break;
      }
   }
-  
+   
   public void buttonCheck(){
        switch(currentScreen){
       case NONE:
@@ -267,7 +267,7 @@ public class DisplayController{
       case EMG_DEMO:
         if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= 50*50){
           println("you clicked Return");
-          emgGame.destroy();
+          //emgGame.exit();
           switchTo(DisplayScreen.EMG);
         }
         break;

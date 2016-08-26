@@ -4,8 +4,11 @@ static final int REFRACT_PERIOD = 30;
 
 /*
  * This class displays data in a line graph
+ * The location given becomes the bottom left corner of the Bar Graph.
  */
 class LineGraph{
+  
+  String title;
   int x,y;
   int xLength, yLength;
   float yData[];
@@ -16,6 +19,7 @@ class LineGraph{
   float MOBDz[];
   int beatLoc[];
   int numBeats = 0;
+  
   boolean performQRSDetection,
           showMOBD;
   
@@ -28,7 +32,7 @@ class LineGraph{
         
   
   
-  LineGraph(int x,int y, int xLen, int yLen, int size, float yMin, float yMax, boolean qrs){
+  LineGraph(int x,int y, int xLen, int yLen, int size, float yMin, float yMax, String title,boolean qrs){
     this.x = x;
     this.y = y;
     xLength = xLen;
@@ -37,7 +41,7 @@ class LineGraph{
     MOBDx = new float[size];
     MOBDy = new float[size];
     MOBDz = new float[size];
-    
+    this.title = title;
     beatLoc = new int[400]; //shouldn't get anywhere close to 400 beats
     this.yMin = yMin;
     this.yMax = yMax;
@@ -143,6 +147,14 @@ class LineGraph{
   }
   
   void draw(){
+    
+    fill(0xff,240);
+    rect(x-15,y+15,xLength+30,-yLength-80,20);
+    
+    fill(0);
+    stroke(0);
+    textSize(20);
+    text(title,x+xLength/2,y-yLength-40);
     //Show some of the lines
     //line(x,y,x+xLength,y);
     //line(x,y-THRESH1,x+xLength,y-THRESH1);

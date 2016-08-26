@@ -5,17 +5,27 @@ DisplayController controller;
 String inString;
 Serial myPort;
 
-public void settings() {
-  size(2200,1000); 
 
-  myPort = new Serial(this, myPort.list()[myPort.list().length - 1], 9600); 
-  myPort.bufferUntil('\n'); 
-  delay(100);
-  myPort.write('0');
+public void settings() {
+  //size(2200,1000); 
+  fullScreen();
+
+  
+  if(myPort.list().length > 3){
+    myPort = new Serial(this, myPort.list()[myPort.list().length - 1], 9600); 
+    myPort.bufferUntil('\n'); 
+    delay(100);
+    myPort.write('0');
+  }else{
+    println("No Arduino Connected");
+    myPort = null; 
+  }
+
   controller = new DisplayController(myPort);
 }
 
 void draw(){
+
   //if(myPort.available() > 0){
   //   inString = myPort.readStringUntil('\n');
   //}
@@ -39,37 +49,61 @@ void serialEvent (Serial myPort) {
 public class DisplayController{
   
   //These store the locations of the buttons
-  final int EMG_BUTTONX = width*3/5;
-  final int EMG_BUTTONY = height/2;
-  final int ECG_BUTTONX = width/4;
-  final int ECG_BUTTONY = height/2;
-  final int EMG_LEARNABOUTX = width/4;
-  final int EMG_LEARNABOUTY = height/2;
-  final int ECG_LEARNABOUTX = width/4;
-  final int ECG_LEARNABOUTY = height/2;
-  final int EMG_DEMOX = width*2/4;
-  final int EMG_DEMOY = height/2;
-  final int ECG_DEMOX = width*2/4;
-  final int ECG_DEMOY = height/2;
-  final int RETURNX = 920;
-  final int RETURNY = height-200;
+  final int EMG_BUTTONX = displayWidth*3/4;
+  final int EMG_BUTTONY = displayHeight/2;
+  final int ECG_BUTTONX = displayWidth/4;
+  final int ECG_BUTTONY = displayHeight/2;
+  final int BUTTONSIZE_1 = 400;
+  final int BUTTONSIZE_2 = 100;
+  
+  final int LEARNX = displayWidth/4;
+  final int LEARNY = displayHeight/2;
+  final int LEARN_SIZEY = 550;
+  final int LEARN_SIZEX = 500;
+  final int ECG_LEARNABOUTX = displayWidth/4;
+  final int ECG_LEARNABOUTY = displayHeight/2;
+  final int EMG_DEMOX = displayWidth*3/4;
+  final int EMG_DEMOY = displayHeight/2;
+  final int ECG_DEMOX = displayWidth*3/4;
+  final int ECG_DEMOY = displayHeight/2;
+  final int RETURNX = displayWidth-100;
+  final int RETURNY = displayHeight-100;
   
   static final int REPEAT_TIME = 15; //in seconds
   
   DisplayScreen currentScreen;
   LineGraph line; //used for the ECG and EMG
   BarGraph bar;   // used only for the EMG
-  PImage img1,img2, bg; //display the images for the current screen
+  PImage heartImg, 
+         muscleImg, 
+         lightbulbImg,
+         bg; //display the images for the current screen
+  
   Serial myPort;        // The serial port
   PApplet emgGame;
+  
+  String ECGInfo = "",
+         EMGInfo= "";
   
   public DisplayController(Serial port){
     currentScreen = DisplayScreen.NONE;
     bg = loadImage("MainBackground.jpg");
-    img1 = loadImage("heart.png");
-    img1.resize(0,400);
-    img2 = loadImage("muscle.png");
-    img2.resize(0,500);
+    heartImg = loadImage("heart3.png");
+    heartImg.resize(0,300);
+    muscleImg = loadImage("muscle.png");
+    muscleImg.resize(0,400);
+    lightbulbImg = loadImage("lightbulb.png");
+    lightbulbImg.resize(0,100);
+    
+    String[] t = loadStrings("ECG.txt");
+    for(int i = 0; i < t.length; i++){
+      ECGInfo += t[i] + "\n";
+    }
+    
+    t = loadStrings("EMG.txt");
+    for(int i = 0; i < t.length; i++){
+      EMGInfo += t[i] + "\n";
+    }
     
     myPort = port;
   }
@@ -107,38 +141,55 @@ public class DisplayController{
   }
   
   public void draw(){
-    background(bg);
+    image(bg,0,0);
     textSize(28);
-    //textFont(
+    textAlign(CENTER, CENTER);
+    strokeWeight(1);
+    
     switch(currentScreen){
-      
-      case NONE:
-        fill(0xff, 150);
 
+      case NONE:
+        fill(0xff,180);
+        strokeWeight(0);        
+        rect(displayWidth*0.07, displayHeight*0.07, displayWidth*0.86, displayHeight*0.86, 250);
+        strokeWeight(3);
+        rect(displayWidth*0.0625, displayHeight*0.0625, displayWidth*0.875, displayHeight*0.875, 250);
         
-        image(img1,ECG_BUTTONX-400,height/2-220);
-        image(img2,EMG_BUTTONX-100,height/2-240);
+        textSize(38);
+        fill(0);
+        text("Choose an option to Demo", displayWidth/2, displayHeight*0.125);
         
-        ellipse(ECG_BUTTONX, height/2, 400, 400);
-        ellipse(EMG_BUTTONX, height/2, 400, 400);
+        fill(0xff,180);
+        textSize(28);
+        image(heartImg,ECG_BUTTONX-200,height/2+70);
+        image(muscleImg,EMG_BUTTONX-20,height/2);
+        
+        ellipse(ECG_BUTTONX, height/2, BUTTONSIZE_1, BUTTONSIZE_1);
+        ellipse(EMG_BUTTONX, height/2, BUTTONSIZE_1, BUTTONSIZE_1);
         
         fill(0);
-        textAlign(CENTER);
+        
         text("Electromyography", EMG_BUTTONX,height/2);
         text("Electrocardiography", ECG_BUTTONX,height/2);
         break;
         
       case EMG:
-        image(img1,20,20);
-        fill(0xff);
-        ellipse(EMG_LEARNABOUTX,EMG_LEARNABOUTY, 300, 300);
-        ellipse(EMG_DEMOX, EMG_DEMOY, 300, 300);
-        ellipse(RETURNX, RETURNY, 100, 100);
         
+        fill(0xff,240);
+
+        ellipse(EMG_DEMOX, EMG_DEMOY, BUTTONSIZE_1, BUTTONSIZE_1);
+        ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
+        
+        //Info Container
+        //fill(0xff);
+        rect(LEARNX - LEARN_SIZEX/2,LEARNY - LEARN_SIZEY/2, LEARN_SIZEX, LEARN_SIZEY,40);
         fill(0);
-        textAlign(CENTER);
-        text("Learn about EMG", EMG_LEARNABOUTX,EMG_LEARNABOUTY);
+        text(EMGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
         text("EMG Demo", EMG_DEMOX,EMG_DEMOY);
+        image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
+        
+        
+        textSize(20);
         text("Return", RETURNX,RETURNY);
         
         break;
@@ -148,32 +199,38 @@ public class DisplayController{
         
  
         
-        fill(0xff);
-        ellipse(RETURNX, RETURNY, 100, 100);
+        fill(0xff,240);
+        ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         fill(0);
+        textSize(20);
         text("Return", RETURNX,RETURNY);
         break;
       case ECG:
-        image(img1,20,20);
-        fill(0xff);
-        ellipse(ECG_LEARNABOUTX, ECG_LEARNABOUTY, 300, 300);
-        ellipse(ECG_DEMOX, ECG_DEMOY, 300, 300);
-        ellipse(RETURNX, RETURNY, 100, 100);
         
+        fill(0xff, 240);
+        ellipse(ECG_DEMOX, ECG_DEMOY, BUTTONSIZE_1, BUTTONSIZE_1);
+        ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
+        
+        //ECG Info container
+        //fill(0xff);
+        rect(LEARNX - LEARN_SIZEX/2,LEARNY - LEARN_SIZEY/2, LEARN_SIZEX, LEARN_SIZEY,40);
         fill(0);
-        textAlign(CENTER);
-        text("Learn about ECG", ECG_LEARNABOUTX, ECG_LEARNABOUTY);
+        text(ECGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
+        image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
+        
         text("ECG Demo", ECG_DEMOX, ECG_DEMOY);
+        textSize(20);
         text("Return", RETURNX,RETURNY);
         
         break;
         
       case ECG_DEMO:
-        background(0xff);
+        //background(0xff);
         line.draw();
-        fill(0xff);
-        ellipse(RETURNX, RETURNY, 100, 100);
+        fill(0xff,240);
+        ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         fill(0);
+        textSize(20);
         text("Return", RETURNX,RETURNY);
         stroke(0);
         
@@ -192,26 +249,21 @@ public class DisplayController{
   private void switchTo(DisplayScreen ds){
      switch(ds){
       case NONE:
-        img1 = loadImage("heart.png");
-        img1.resize(0,400);
-        img2 = loadImage("muscle.png");
-        img2.resize(0,500);
         
         line = null;
         bar = null;
         currentScreen = DisplayScreen.NONE;
         
-        myPort.write('0');
+        //myPort.write('0');
         break;
       case EMG:
-        img1 = loadImage("lightbulb.png");
         currentScreen = DisplayScreen.EMG;
         
-        myPort.write('0');
+        //myPort.write('0');
         break;
       case EMG_DEMO:
-        bar = new BarGraph(450,height-40, 200, 1000,350,TriggerType.RISING_EDGE);
-        line = new LineGraph(20,height-20,500,400,400,-90,600,false);
+        bar = new BarGraph(450,height-40, 200, 1000,350,"Enveloped Signal");
+        line = new LineGraph(60,height-40,350,350,350,-90,600,"Raw Signal",false);
         
         emgGame =  new FlappyRaven();
         runSketch( new String[] { "--display=1",
@@ -222,17 +274,16 @@ public class DisplayController{
         currentScreen = DisplayScreen.EMG_DEMO;
         break;
       case ECG:
-        img1 = loadImage("lightbulb.png");
         currentScreen = DisplayScreen.ECG;
         
-        myPort.write('0');
+        //myPort.write('0');
         break;
       case ECG_DEMO:
         bar = null;
-        line = new LineGraph(100,height/2,REPEAT_TIME*100,400,REPEAT_TIME*100,0, 700,true);
+        line = new LineGraph(0,height-50,REPEAT_TIME*100,400,REPEAT_TIME*100,0, 700,"ECG Data",true);
         currentScreen = DisplayScreen.ECG_DEMO;
         
-        myPort.write('1');
+        //myPort.write('1');
         break;
      }
   }
@@ -240,51 +291,51 @@ public class DisplayController{
   public void buttonCheck(){
        switch(currentScreen){
       case NONE:
-        if((mouseX-EMG_BUTTONX)*(mouseX-EMG_BUTTONX) + (mouseY- EMG_BUTTONY)*(mouseY- EMG_BUTTONY) <= 150*150){
+        if((mouseX-EMG_BUTTONX)*(mouseX-EMG_BUTTONX) + (mouseY- EMG_BUTTONY)*(mouseY- EMG_BUTTONY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
           println("you clicked EMG");
           switchTo(DisplayScreen.EMG);  
-        }else if((mouseX-ECG_BUTTONX)*(mouseX-ECG_BUTTONX) + (mouseY- ECG_BUTTONY)*(mouseY-ECG_BUTTONY) <= 150*150){
+        }else if((mouseX-ECG_BUTTONX)*(mouseX-ECG_BUTTONX) + (mouseY- ECG_BUTTONY)*(mouseY-ECG_BUTTONY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
           println("you clicked ECG");
           switchTo(DisplayScreen.ECG);          
         }
         break;
       case EMG:
-        if((mouseX-EMG_LEARNABOUTX)*(mouseX-EMG_LEARNABOUTX) + (mouseY- EMG_LEARNABOUTY)*(mouseY- EMG_LEARNABOUTY) <= 150*150){
+        if((mouseX-LEARNX)*(mouseX-LEARNX) + (mouseY- LEARNY)*(mouseY- LEARNY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
           println("you clicked to Learn about EMG");
           //currentScreen = DisplayScreen.EMG;
-        }else if((mouseX-EMG_DEMOX)*(mouseX-EMG_DEMOX) + (mouseY- EMG_DEMOY)*(mouseY- EMG_DEMOY) <= 150*150){
+        }else if((mouseX-EMG_DEMOX)*(mouseX-EMG_DEMOX) + (mouseY- EMG_DEMOY)*(mouseY- EMG_DEMOY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
           println("you clicked EMG Demo");
           switchTo(DisplayScreen.EMG_DEMO);
-        }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= 50*50){
+        }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
           println("you clicked Return");
           switchTo(DisplayScreen.NONE);
-        }else if(bar.insideGraph(mouseX,mouseY)){
-          //myPort.write("THRSH:" + str(bGraph.getTT()) + ":" + str(bGraph.getThreshold()));
-          bar.setThreshold(mouseY);
-          println("THRSH:" + str(bar.getTT()) + ":" + str(bar.getThreshold()));
         }
         break;
       case EMG_DEMO:
-        if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= 50*50){
+        if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
           println("you clicked Return");
           //emgGame.exit();
           switchTo(DisplayScreen.EMG);
+        }else if(bar.insideGraph(mouseX,mouseY)){
+          //myPort.write("THRSH:" + str(bGraph.getTT()) + ":" + str(bGraph.getThreshold()));
+          bar.setThreshold(mouseY);
+          println("THRSH:" + str(bar.getThreshold()));
         }
         break;
       case ECG:
-        if((mouseX-ECG_LEARNABOUTX)*(mouseX-ECG_LEARNABOUTX) + (mouseY- ECG_LEARNABOUTY)*(mouseY- ECG_LEARNABOUTY) <= 150*150){
+        if((mouseX-LEARNX)*(mouseX-LEARNX) + (mouseY- LEARNY)*(mouseY- LEARNY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
           println("you clicked to Learn about ECG");
           //currentScreen = DisplayScreen.EMG;
-        }else if((mouseX-ECG_DEMOX)*(mouseX-ECG_DEMOX) + (mouseY- ECG_DEMOY)*(mouseY- ECG_DEMOY) <= 150*150){
+        }else if((mouseX-ECG_DEMOX)*(mouseX-ECG_DEMOX) + (mouseY- ECG_DEMOY)*(mouseY- ECG_DEMOY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
           println("you clicked ECG Demo");
           switchTo(DisplayScreen.ECG_DEMO);
-        }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= 50*50){
+        }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
           println("you clicked Return");
           switchTo(DisplayScreen.NONE);
         }
         break;
       case ECG_DEMO:
-        if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= 50*50){
+        if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
           println("you clicked Return");
           switchTo(DisplayScreen.ECG);
         }

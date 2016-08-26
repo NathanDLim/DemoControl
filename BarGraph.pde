@@ -1,33 +1,34 @@
 
 /*
  * This class creates a bar graph of a given size which can trigger upon certain events (Rising/Falling edge, etc.)
+ * The location given becomes the bottom left corner of the Bar Graph.
  */
 class BarGraph{
+  String title;
   int x,y; //base x and y coordinates of the graph
   int barWidth;
   int size; //size of bar graph
   //Expecting a value between 0 and valMax;
   float val,valMax; //current value and the max value
   float threshold; //the value at which the trigger event takes place
-  TriggerType tt; 
   boolean triggered; //bool to check if a trigger has happened
   
   /*
    * 
    */
-  BarGraph(int x, int y, int thresh,int valMax, int gsize,TriggerType tt){
+  BarGraph(int x, int y, int thresh,int valMax, int gsize, String title){
     this.x = x;
     this.y = y;
     this.valMax = valMax;
+    this.title = title;
     if(gsize < 200)
       gsize = 200;
     size = gsize;
     barWidth = size/3;
     threshold = thresh;
-    this.tt = tt;
   }
   
-  //Default size is 200, default trigger type is rising edge, 
+  //Default size is 200
   BarGraph(int x, int y, int thresh, int valMax){
     this.x = x;
     this.y = y;
@@ -35,25 +36,13 @@ class BarGraph{
     size = 200;
     barWidth = size/3;
     threshold = thresh;
-    this.tt = TriggerType.RISING_EDGE;
   }
   
   void update(float v){
     
     //determine the state of the trigger
-    if(tt == TriggerType.RISING_EDGE){
-      if(val < threshold && v >= threshold)
-        triggered = true;
-    }else if(tt == TriggerType.FALLING_EDGE){
-      if(val > threshold && v <= threshold)
-        triggered = true;
-    }else if(tt == TriggerType.ABOVE_THRESH){
-      if(v > threshold)
-        triggered = true;
-    }else if(tt == TriggerType.BELOW_THRESH){
-      if(v < threshold)
-        triggered = true;
-    }
+    if(val < threshold && v >= threshold)
+      triggered = true;
     
     //update the current val
     val = v;
@@ -61,33 +50,43 @@ class BarGraph{
     else if(val<0) val =0;
   }
   
-  void draw(){
-    fill(0xff);
-    stroke(0xff);
+  void draw(){    
+    fill(0xff,240);
+    rect(x-15,y+15,size+30, -size-80,20);
+    
+    fill(0);
+    stroke(0);
+    textSize(20);
+    
+    text(title,x+size/2,y-size-40);
+
     textSize(16);
     //draw the bar graph axes
     line(x+50,y,x+50,y-size-5);
     line(x+25,y,x+size,y);
     
     //draw y axis ticks
-    text(nf(valMax,3,2), x+2, y-size+4);
+    text(nf(valMax,3,0), x+18, y-size-2);
     line(x+45,y-size,x+55,y-size);
-    text(nf(valMax*3/4,3,2), x+2, y-size*3/4+4);
+    text(nf(valMax*3/4,3,0), x+18, y-size*3/4-2);
     line(x+45,y-size*3/4,x+55,y-size*3/4);
-    text(nf(valMax/2,3,2), x+2, y-size/2+4);
+    text(nf(valMax/2,3,0), x+18, y-size/2-2);
     line(x+45,y-size/2,x+55,y-size/2);
-    text(nf(valMax*1/4,3,2), x+2, y-size*1/4+4);
+    text(nf(valMax*1/4,3,0), x+18, y-size*1/4-2);
     line(x+45,y-size*1/4, x+55, y-size*1/4);
+    
     
     //draw the threshold line
     float normThresh = map(threshold,0,valMax,0,size);
+    stroke(162,11,11);
+    fill(119,11,11);
     line(x+45,y-normThresh,x+size,y-normThresh);
-    text(nf(threshold,3,2),x+size-10,y-normThresh-10);
+    text(nf(threshold,3,0),x+size-20,y-normThresh-10);
     
     //draw the bar
     float normVal = map(val,0,valMax,0,size);
     rect(x+size/3,y,barWidth,-normVal);
-    text(nf(val,3,2),x+size/3+20,y-normVal-10);
+    text(nf(val,3,0),x+size/3+20,y-normVal-10);
   }
   
   float getVal(){
@@ -96,14 +95,6 @@ class BarGraph{
   
   float getThreshold(){
     return threshold; 
-  }
-  
-  int getTT(){
-    return tt.ordinal(); 
-  }
-  
-  void setTT(TriggerType t){
-   tt = t; 
   }
   
   boolean insideGraph(int x1,int y1){

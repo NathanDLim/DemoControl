@@ -1,0 +1,3 @@
+ElectroMyoGraphy
+
+When a muscle contracts, the potential varies over the fibre. Using two electrodes and taking the difference, we can find the amplitude of the flex.

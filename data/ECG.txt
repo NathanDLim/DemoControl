@@ -1,0 +1,3 @@
+ElectroCardioGraphy
+
+As a heart pumps, electrical signals permeate throughout the body to the top layer of skin. Electrodes can be used to pick up the minor changes in potential.

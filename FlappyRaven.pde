@@ -1,34 +1,33 @@
 import java.util.Random;
 
-public class FlappyRaven extends PApplet{
+public class FlappyRaven{
   int bgGroundLevel = 60;
   PImage bg;
   Game game;
+  int flappyX,flappyY;
+  int xLen,yLen;
   
-  public FlappyRaven() {
-    super();
-  }
-  
-  public void settings(){
-    size(1000, 500);
-    //removeExitEvent(getSurface());
+  public FlappyRaven(int x, int y) {
+    this.flappyX = x;
+    this.flappyY = y;
+    xLen = 1000;
+    yLen = 500;
     game = new Game();
     bg = loadImage("Background.png");
+    bg.resize(xLen,yLen);
   }
+  
   
   void draw() 
   {
-    background(bg);
-    
+    image(bg,flappyX,flappyY);
+
     game.update();
     game.draw();
   }
   
   void mouseClicked(){
     game.jump();
-  }
-  
-  @ Override void exit() {
   }
 
   class Game{
@@ -56,7 +55,7 @@ public class FlappyRaven extends PApplet{
       }else if(!gameOver){
       
         if(millis() - time >= difficulty){
-          bars.add(makeBar(width));
+          bars.add(makeBar(flappyX+xLen));
           //System.out.println("here");
           time = millis();
         }
@@ -76,7 +75,7 @@ public class FlappyRaven extends PApplet{
               gameOver();
         
         bird.update();
-        if(bird.getY() > height-bgGroundLevel)
+        if(bird.getY() > (flappyY+yLen)-bgGroundLevel)
            gameOver();
         
         td.update("Score: " + score);
@@ -94,8 +93,8 @@ public class FlappyRaven extends PApplet{
     private void startGame(){
      difficulty = 5000;
      bars.clear();
-     bars.add(makeBar(width - 300));
-     bars.add(makeBar(width));
+     bars.add(makeBar(flappyX+xLen - 300));
+     bars.add(makeBar(flappyX+xLen));
      bird = new Bird();
      score =0;
      time = millis();
@@ -107,14 +106,15 @@ public class FlappyRaven extends PApplet{
     
     private Bar makeBar(int x){
       int size = difficulty/20;
-      int pos = (int)r.nextInt((height-size-bgGroundLevel-5));
-      if(pos<25) pos = 25;
-      if(pos > height-size-65) pos = height-size-bgGroundLevel-5;
+      int pos = (int)r.nextInt(((yLen)-size-bgGroundLevel-5));
+      if(pos<25+flappyY) pos = 25+flappyY;
+      if(pos > (flappyY+yLen-size-65)) pos = flappyY+yLen-size-bgGroundLevel-5;
       //System.out.print(difficulty/25);
       return new Bar(x,size,pos);
     }
     
     public void draw(){
+      
       for(int i = 0; i < bars.size(); i++){
           bars.get(i).draw();
       }
@@ -137,8 +137,8 @@ public class FlappyRaven extends PApplet{
     float accel;
     
     public Bird(){
-     x = 50;
-     y = height/2;
+     x = (40)+flappyX;
+     y = (flappyY+yLen)/2;
     }
     
     public void update(){
@@ -210,11 +210,16 @@ public class FlappyRaven extends PApplet{
     
     public void draw(){
       
-      fill(99,209,62);
-      rect(x,0,barWidth,breakPosition);
-      rect(x,breakPosition+breakSize,barWidth,height - (breakPosition+breakSize) - 40);
-      rect(x-6,breakPosition-20,barWidth + 12,20);
-      rect(x-6,breakPosition+breakSize,barWidth + 12,20);
+      fill(99,209,62); //Mario Tube green
+      
+      //Top tube
+      rect(x,flappyY,barWidth,breakPosition);
+      //bottom tube
+      rect(x,flappyY+breakPosition+breakSize,barWidth, yLen - (breakPosition+breakSize) - 40); 
+      
+      //tube openings
+      rect(x-6,flappyY+breakPosition-20,barWidth + 12,20);
+      rect(x-6,flappyY+breakPosition+breakSize,barWidth + 12,20); 
     }
     
     public void update(){
@@ -222,7 +227,7 @@ public class FlappyRaven extends PApplet{
     }
     
     public boolean checkBounds(){
-     if(x < -barWidth)
+     if(x < flappyX-barWidth)
        return false;
      return true;
     }
@@ -231,7 +236,7 @@ public class FlappyRaven extends PApplet{
     public boolean collision(Bird b){
       if(b.getX() + 17 >= x && b.getX() - 17 < x + barWidth){
           
-        if(!(b.getY() - 15 > breakPosition && b.getY() + 15 < breakPosition+breakSize))
+        if(!(b.getY() - 15 > flappyY+breakPosition && b.getY() + 15 < flappyY+breakPosition+breakSize))
          return true;
       }
       
@@ -275,11 +280,11 @@ public class FlappyRaven extends PApplet{
     public void setCenter(boolean center){
       centerText = center; 
       if(centerText){
-        this.x = width/2;
-        this.y = height/2;
+        this.x = (xLen)/2 + flappyX;
+        this.y = (yLen)/2 + flappyY;
       }else{
-        this.x = width-120;
-        this.y = 30;
+        this.x = flappyX+xLen-120;
+        this.y = flappyY + 30;
       }
     }
     

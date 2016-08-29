@@ -11,7 +11,7 @@ public void settings() {
   fullScreen();
 
   
-  if(myPort.list().length > 3){
+  if(myPort.list().length >= 3){
     myPort = new Serial(this, myPort.list()[myPort.list().length - 1], 9600); 
     myPort.bufferUntil('\n'); 
     delay(100);
@@ -56,10 +56,10 @@ public class DisplayController{
   final int BUTTONSIZE_1 = 400;
   final int BUTTONSIZE_2 = 100;
   
-  final int LEARNX = displayWidth/4;
+  final int LEARNX = displayWidth/3;
   final int LEARNY = displayHeight/2;
-  final int LEARN_SIZEY = 550;
-  final int LEARN_SIZEX = 500;
+  final int LEARN_SIZEY = 800;
+  final int LEARN_SIZEX = 900;
   final int ECG_LEARNABOUTX = displayWidth/4;
   final int ECG_LEARNABOUTY = displayHeight/2;
   final int EMG_DEMOX = displayWidth*3/4;
@@ -77,10 +77,12 @@ public class DisplayController{
   PImage heartImg, 
          muscleImg, 
          lightbulbImg,
+         emgSigImg,
+         ecgSigImg,
          bg; //display the images for the current screen
   
   Serial myPort;        // The serial port
-  PApplet emgGame;
+  FlappyRaven emgGame;
   
   String ECGInfo = "",
          EMGInfo= "";
@@ -94,6 +96,9 @@ public class DisplayController{
     muscleImg.resize(0,400);
     lightbulbImg = loadImage("lightbulb.png");
     lightbulbImg.resize(0,100);
+    emgSigImg = loadImage("emgSignal.png");
+    ecgSigImg = loadImage("ecgSignal.png");
+    ecgSigImg.resize(0,150);
     
     String[] t = loadStrings("ECG.txt");
     for(int i = 0; i < t.length; i++){
@@ -184,10 +189,15 @@ public class DisplayController{
         //fill(0xff);
         rect(LEARNX - LEARN_SIZEX/2,LEARNY - LEARN_SIZEY/2, LEARN_SIZEX, LEARN_SIZEY,40);
         fill(0);
+        
+        textSize(28);
+        text("What is Electromyography?",LEARNX,LEARNY - LEARN_SIZEY*3/8);
+        
+        textSize(18);
         text(EMGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
         text("EMG Demo", EMG_DEMOX,EMG_DEMOY);
         image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
-        
+        image(emgSigImg,LEARNX-LEARN_SIZEX/2+100,LEARNY+180);
         
         textSize(20);
         text("Return", RETURNX,RETURNY);
@@ -197,7 +207,7 @@ public class DisplayController{
         bar.draw();
         line.draw();
         
- 
+        emgGame.draw();
         
         fill(0xff,240);
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
@@ -215,8 +225,13 @@ public class DisplayController{
         //fill(0xff);
         rect(LEARNX - LEARN_SIZEX/2,LEARNY - LEARN_SIZEY/2, LEARN_SIZEX, LEARN_SIZEY,40);
         fill(0);
+        textSize(28);
+        text("What is Electrocardiography?",LEARNX,LEARNY - LEARN_SIZEY*3/8);
+        
+        textSize(18);
         text(ECGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
         image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
+        image(ecgSigImg,LEARNX - LEARN_SIZEX*3/8+100,LEARNY+230);
         
         text("ECG Demo", ECG_DEMOX, ECG_DEMOY);
         textSize(20);
@@ -225,8 +240,9 @@ public class DisplayController{
         break;
         
       case ECG_DEMO:
-        //background(0xff);
+        
         line.draw();
+        
         fill(0xff,240);
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         fill(0);
@@ -238,11 +254,8 @@ public class DisplayController{
         fill(0, 102, 153, 51);
         text(line.getNumBeats()*60/REPEAT_TIME + " BPM", 100, 35);  // Specify a z-axis value
         
-        
-
         break;
     }
-    
   }
  
   
@@ -254,36 +267,32 @@ public class DisplayController{
         bar = null;
         currentScreen = DisplayScreen.NONE;
         
-        //myPort.write('0');
+        myPort.write('0');
         break;
       case EMG:
         currentScreen = DisplayScreen.EMG;
         
-        //myPort.write('0');
+        myPort.write('0');
         break;
       case EMG_DEMO:
         bar = new BarGraph(450,height-40, 200, 1000,350,"Enveloped Signal");
         line = new LineGraph(60,height-40,350,350,350,-90,600,"Raw Signal",false);
         
-        emgGame =  new FlappyRaven();
-        runSketch( new String[] { "--display=1",
-                          "--location=0,0",
-                          "--sketch-path=" + sketchPath(),
-                          "" },
-          emgGame);
+        emgGame =  new FlappyRaven(400,100);
+
         currentScreen = DisplayScreen.EMG_DEMO;
         break;
       case ECG:
         currentScreen = DisplayScreen.ECG;
         
-        //myPort.write('0');
+        myPort.write('0');
         break;
       case ECG_DEMO:
         bar = null;
-        line = new LineGraph(0,height-50,REPEAT_TIME*100,400,REPEAT_TIME*100,0, 700,"ECG Data",true);
+        line = new LineGraph(0,700,REPEAT_TIME*100,400,REPEAT_TIME*100,0, 700,"ECG Data",true);
         currentScreen = DisplayScreen.ECG_DEMO;
         
-        //myPort.write('1');
+        myPort.write('1');
         break;
      }
   }
@@ -320,6 +329,8 @@ public class DisplayController{
           //myPort.write("THRSH:" + str(bGraph.getTT()) + ":" + str(bGraph.getThreshold()));
           bar.setThreshold(mouseY);
           println("THRSH:" + str(bar.getThreshold()));
+        }else{
+          emgGame.mouseClicked(); 
         }
         break;
       case ECG:

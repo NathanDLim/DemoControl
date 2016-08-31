@@ -15,7 +15,7 @@ public void settings() {
     myPort = new Serial(this, myPort.list()[myPort.list().length - 1], 9600); 
     myPort.bufferUntil('\n'); 
     delay(100);
-    myPort.write('0');
+    myPort.write("NONE");
   }else{
     println("No Arduino Connected");
     myPort = null; 
@@ -115,12 +115,17 @@ public class DisplayController{
   
   //Takes a string and adds it onto the appropriate graph.
   public void update(String in){
+    println(in);
+    
+    if(in == null)
+      return;
+    
+    
+    String inString = trim(in);
+    
     switch(currentScreen){
       case ECG_DEMO:
         float inByte;
-        if (in != null) {
-          // trim off any whitespace:
-          inString = trim(in);
           
           // If leads off detection is true notify with blue line
           if (inString.equals("!")) {
@@ -135,11 +140,23 @@ public class DisplayController{
            inByte = map(inByte, 0, 700, 0, height);
            
            line.update(inByte);
-          
-        }
+
         break;
       case EMG_DEMO:
-      
+
+           
+         // Parses the data on spaces, converts to floats, and puts each number into the array
+         float[] floatArray;
+         floatArray = float(split(inString, " "));
+         
+         // Make sure the array is at least 2 strings long.   
+         if (floatArray.length >= 2) {
+           // Assign the two numbers to variables so they can be drawn
+           line.update(floatArray[0]);
+           bar.update(floatArray[1]);
+           // You could do the drawing down here in the serialEvent, but it would be choppy
+         }
+         
         break;
       
     }
@@ -252,7 +269,7 @@ public class DisplayController{
         
         textSize(32);
         fill(0, 102, 153, 51);
-        text(line.getNumBeats()*60/REPEAT_TIME + " BPM", 100, 35);  // Specify a z-axis value
+        text(line.getNumBeats()*60/REPEAT_TIME + " BPM", 250, 300);  // Specify a z-axis value
         
         break;
     }
@@ -267,12 +284,16 @@ public class DisplayController{
         bar = null;
         currentScreen = DisplayScreen.NONE;
         
-        myPort.write('0');
+        
         break;
       case EMG:
+        if(currentScreen == DisplayScreen.EMG_DEMO){
+          myPort.write("NONE");
+          myPort.clear(); 
+        }
         currentScreen = DisplayScreen.EMG;
         
-        myPort.write('0');
+        
         break;
       case EMG_DEMO:
         bar = new BarGraph(450,height-40, 200, 1000,350,"Enveloped Signal");
@@ -281,18 +302,24 @@ public class DisplayController{
         emgGame =  new FlappyRaven(400,100);
 
         currentScreen = DisplayScreen.EMG_DEMO;
+        myPort.write("EMG");
+        myPort.clear();
         break;
       case ECG:
+        if(currentScreen == DisplayScreen.ECG_DEMO){
+          myPort.write("NONE");
+          myPort.clear(); 
+        }
         currentScreen = DisplayScreen.ECG;
-        
-        myPort.write('0');
+
         break;
       case ECG_DEMO:
         bar = null;
-        line = new LineGraph(0,700,REPEAT_TIME*100,400,REPEAT_TIME*100,0, 700,"ECG Data",true);
+        line = new LineGraph(200,700,REPEAT_TIME*100,400,REPEAT_TIME*100,0, 1100,"ECG Data",true);
         currentScreen = DisplayScreen.ECG_DEMO;
         
-        myPort.write('1');
+        myPort.write("ECG");
+        myPort.clear();
         break;
      }
   }
@@ -301,34 +328,27 @@ public class DisplayController{
        switch(currentScreen){
       case NONE:
         if((mouseX-EMG_BUTTONX)*(mouseX-EMG_BUTTONX) + (mouseY- EMG_BUTTONY)*(mouseY- EMG_BUTTONY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
-          println("you clicked EMG");
           switchTo(DisplayScreen.EMG);  
         }else if((mouseX-ECG_BUTTONX)*(mouseX-ECG_BUTTONX) + (mouseY- ECG_BUTTONY)*(mouseY-ECG_BUTTONY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
-          println("you clicked ECG");
           switchTo(DisplayScreen.ECG);          
         }
         break;
       case EMG:
         if((mouseX-LEARNX)*(mouseX-LEARNX) + (mouseY- LEARNY)*(mouseY- LEARNY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
-          println("you clicked to Learn about EMG");
           //currentScreen = DisplayScreen.EMG;
         }else if((mouseX-EMG_DEMOX)*(mouseX-EMG_DEMOX) + (mouseY- EMG_DEMOY)*(mouseY- EMG_DEMOY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
-          println("you clicked EMG Demo");
           switchTo(DisplayScreen.EMG_DEMO);
         }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
-          println("you clicked Return");
           switchTo(DisplayScreen.NONE);
         }
         break;
       case EMG_DEMO:
         if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
-          println("you clicked Return");
-          //emgGame.exit();
           switchTo(DisplayScreen.EMG);
         }else if(bar.insideGraph(mouseX,mouseY)){
-          //myPort.write("THRSH:" + str(bGraph.getTT()) + ":" + str(bGraph.getThreshold()));
           bar.setThreshold(mouseY);
-          println("THRSH:" + str(bar.getThreshold()));
+          myPort.write("THRSH:" + str(bar.getThreshold()));
+          //println("THRSH:" + str(bar.getThreshold()));
         }else{
           emgGame.mouseClicked(); 
         }
@@ -338,16 +358,13 @@ public class DisplayController{
           println("you clicked to Learn about ECG");
           //currentScreen = DisplayScreen.EMG;
         }else if((mouseX-ECG_DEMOX)*(mouseX-ECG_DEMOX) + (mouseY- ECG_DEMOY)*(mouseY- ECG_DEMOY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
-          println("you clicked ECG Demo");
           switchTo(DisplayScreen.ECG_DEMO);
         }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
-          println("you clicked Return");
           switchTo(DisplayScreen.NONE);
         }
         break;
       case ECG_DEMO:
         if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
-          println("you clicked Return");
           switchTo(DisplayScreen.ECG);
         }
         break;

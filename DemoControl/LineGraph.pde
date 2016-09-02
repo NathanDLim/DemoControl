@@ -147,7 +147,7 @@ class LineGraph{
   }
   
   void draw(){
-    
+    stroke(0);
     fill(0xff,240);
     rect(x-15,y+15,xLength+30,-yLength-80,20);
     

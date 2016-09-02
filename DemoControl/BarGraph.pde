@@ -87,6 +87,7 @@ class BarGraph{
     float normVal = map(val,0,valMax,0,size);
     rect(x+size/3,y,barWidth,-normVal);
     text(nf(val,3,0),x+size/3+20,y-normVal-10);
+    
   }
   
   float getVal(){

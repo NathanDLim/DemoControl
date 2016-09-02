@@ -24,6 +24,13 @@ public class FlappyRaven{
 
     game.update();
     game.draw();
+    
+    fill(0);
+    noStroke();
+    rect(flappyX-10,flappyY,10,yLen);
+    rect(flappyX+xLen,flappyY,10,yLen);
+    rect(flappyX-10,flappyY-10,xLen+20,10);
+    rect(flappyX-10,flappyY+yLen,xLen+20,10);
   }
   
   void mouseClicked(){
@@ -50,7 +57,7 @@ public class FlappyRaven{
     
     public void update(){
       if(showOpeningInfo){
-        td.update("Welcome to Flappy Raven! Click anywhere to begin.");
+        td.update("Welcome to Flappy Raven!\nPlace your arm in the brace and squeeze to see the bar graph increase. Click the bar graph to set the threshold. When it passes the red line, the mouse will click. \n\nClick inside the game to start");
         td.setCenter(true);
       }else if(!gameOver){
       
@@ -114,7 +121,7 @@ public class FlappyRaven{
     }
     
     public void draw(){
-      
+      strokeWeight(1);
       for(int i = 0; i < bars.size(); i++){
           bars.get(i).draw();
       }
@@ -143,8 +150,8 @@ public class FlappyRaven{
     
     public void update(){
       y += accel;
-      if(y < 20)
-        y = 20;
+      if(y < flappyY+20)
+        y = flappyY+20;
       accel = accel > 3? accel: accel + 0.05;
     }
     
@@ -212,14 +219,26 @@ public class FlappyRaven{
       
       fill(99,209,62); //Mario Tube green
       
+      //cut off the tubes when on the sides
+      int start = x;
+      int size = barWidth;
+      if(x < flappyX){
+        start = flappyX;
+        size -= (start-x);
+      }else if( x+ barWidth > flappyX+xLen){
+        size = (flappyX+xLen-x); 
+      }
+      
+      
+      
       //Top tube
-      rect(x,flappyY,barWidth,breakPosition);
+      rect(start,flappyY,size,breakPosition);
       //bottom tube
-      rect(x,flappyY+breakPosition+breakSize,barWidth, yLen - (breakPosition+breakSize) - 40); 
+      rect(start,flappyY+breakPosition+breakSize,size, yLen - (breakPosition+breakSize) - 40); 
       
       //tube openings
-      rect(x-6,flappyY+breakPosition-20,barWidth + 12,20);
-      rect(x-6,flappyY+breakPosition+breakSize,barWidth + 12,20); 
+      rect(start-6,flappyY+breakPosition-20,size + 12,20);
+      rect(start-6,flappyY+breakPosition+breakSize,size + 12,20); 
     }
     
     public void update(){
@@ -261,19 +280,19 @@ public class FlappyRaven{
     public void draw(){
       
       textFont(createFont("Georgia", size));
-      textAlign(CENTER);
+      textAlign(CENTER, CENTER);
       
       if(!centerText){
         fill(0xff,160);
         ellipse(x,y,(size-5)*text.length()+4,40);
         fill(0);
-        text(text,x,y+7);
+        text(text,x,y-2);
       }else{
         fill(0xff,160);
         ellipse(x,y,800,400);
         fill(0);
         
-        text(text,x,y);
+        text(text,x-230,y-260, xLen-500, 500);
       }
     }
     

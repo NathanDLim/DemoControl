@@ -18,6 +18,7 @@ public void settings() {
     myPort.write("NONE");
   }else{
     println("No Arduino Connected");
+    exit();
     myPort = null; 
   }
 
@@ -69,6 +70,9 @@ public class DisplayController{
   final int RETURNX = displayWidth-100;
   final int RETURNY = displayHeight-100;
   
+  final int FLAPPYX = 400;
+  final int FLAPPYY = 100;
+  
   static final int REPEAT_TIME = 15; //in seconds
   
   DisplayScreen currentScreen;
@@ -115,7 +119,6 @@ public class DisplayController{
   
   //Takes a string and adds it onto the appropriate graph.
   public void update(String in){
-    println(in);
     
     if(in == null)
       return;
@@ -162,14 +165,19 @@ public class DisplayController{
     }
   }
   
+  
+  /*
+   * The draw function draws depending on which screen is currently being displayed
+   */
   public void draw(){
     image(bg,0,0);
-    textSize(28);
+    textSize(38);
     textAlign(CENTER, CENTER);
-    strokeWeight(1);
+    strokeWeight(3);
     
     switch(currentScreen){
 
+      //This is the starting screen, two options, EMG or ECG
       case NONE:
         fill(0xff,180);
         strokeWeight(0);        
@@ -195,6 +203,7 @@ public class DisplayController{
         text("Electrocardiography", ECG_BUTTONX,height/2);
         break;
         
+      //This is the EMG screen. It displays information about what EMG is and has two buttons: EMG Demo and Return
       case EMG:
         
         fill(0xff,240);
@@ -212,26 +221,38 @@ public class DisplayController{
         
         textSize(18);
         text(EMGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
-        text("EMG Demo", EMG_DEMOX,EMG_DEMOY);
         image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
         image(emgSigImg,LEARNX-LEARN_SIZEX/2+100,LEARNY+180);
+        
+        textSize(28);
+        text("EMG Demo", EMG_DEMOX,EMG_DEMOY);
         
         textSize(20);
         text("Return", RETURNX,RETURNY);
         
         break;
+        
+      //This is the EMG Demo. It shows the EMG raw data and the enveloped data in a bar graph. It has a Return button
       case EMG_DEMO:
+        strokeWeight(1);
         bar.draw();
         line.draw();
         
         emgGame.draw();
         
+        
+        textAlign(CENTER, CENTER);
+        stroke(0);
+        strokeWeight(3);
         fill(0xff,240);
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         fill(0);
         textSize(20);
         text("Return", RETURNX,RETURNY);
+        
         break;
+        
+      //This is the ECG screen. It displays information about what ECG is and has two buttons: ECG Demo and Return
       case ECG:
         
         fill(0xff, 240);
@@ -250,16 +271,19 @@ public class DisplayController{
         image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
         image(ecgSigImg,LEARNX - LEARN_SIZEX*3/8+100,LEARNY+230);
         
+        textSize(28);
         text("ECG Demo", ECG_DEMOX, ECG_DEMOY);
         textSize(20);
         text("Return", RETURNX,RETURNY);
         
         break;
-        
+      
+      //This is the ECG Demo screen. It has a line graph showing the ECG signal and has a Return button too
       case ECG_DEMO:
-        
+        strokeWeight(1);
         line.draw();
         
+        strokeWeight(3);
         fill(0xff,240);
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         fill(0);
@@ -269,13 +293,15 @@ public class DisplayController{
         
         textSize(32);
         fill(0, 102, 153, 51);
-        text(line.getNumBeats()*60/REPEAT_TIME + " BPM", 250, 300);  // Specify a z-axis value
+        text(line.getNumBeats()*60/REPEAT_TIME + " BPM", 250, 280);  // Specify a z-axis value
         
         break;
     }
   }
  
-  
+  /*
+   * This function is called to switch between screens. It is responsible for sending data to the Arduino to tell it to switch modes too. It creates the graphs and game for the demo.
+   */
   private void switchTo(DisplayScreen ds){
      switch(ds){
       case NONE:
@@ -297,8 +323,7 @@ public class DisplayController{
         break;
       case EMG_DEMO:
         bar = new BarGraph(450,height-40, 200, 1000,350,"Enveloped Signal");
-        line = new LineGraph(60,height-40,350,350,350,-90,600,"Raw Signal",false);
-        
+        line = new LineGraph(60,height-40,350,350,350,-150,150,"Raw Signal",false);
         emgGame =  new FlappyRaven(400,100);
 
         currentScreen = DisplayScreen.EMG_DEMO;
@@ -324,6 +349,11 @@ public class DisplayController{
      }
   }
    
+   
+   
+  /*
+   * This function is called whenever the mouse is clicked. It specifies regions where the buttons will take effect. It calls the switchTo() function
+   */
   public void buttonCheck(){
        switch(currentScreen){
       case NONE:
@@ -349,7 +379,7 @@ public class DisplayController{
           bar.setThreshold(mouseY);
           myPort.write("THRSH:" + str(bar.getThreshold()));
           //println("THRSH:" + str(bar.getThreshold()));
-        }else{
+        }else if(mouseX > FLAPPYX && mouseX < FLAPPYX + 1000 && mouseY > FLAPPYY && mouseY < FLAPPYY + 500){
           emgGame.mouseClicked(); 
         }
         break;

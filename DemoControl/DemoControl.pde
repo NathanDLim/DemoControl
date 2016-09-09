@@ -90,6 +90,7 @@ public class DisplayController{
   
   String ECGInfo = "",
          EMGInfo= "";
+  boolean ECGOpen;
   
   public DisplayController(Serial port){
     currentScreen = DisplayScreen.NONE;
@@ -132,11 +133,13 @@ public class DisplayController{
           
           // If leads off detection is true notify with blue line
           if (inString.equals("!")) {
+            ECGOpen = true;
             inByte = 350;  // middle of the ADC range (Flat Line)
           }
           // If the data is good let it through
           else {
             inByte = float(inString); 
+            ECGOpen = false;
            }
            
            //Map and draw the line for new data point
@@ -222,7 +225,11 @@ public class DisplayController{
         textSize(18);
         text(EMGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
         image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
-        image(emgSigImg,LEARNX-LEARN_SIZEX/2+100,LEARNY+180);
+        image(emgSigImg,LEARNX-LEARN_SIZEX/2+200,LEARNY+180);
+        
+        textSize(10);
+        text("(R. Merletti and P. Parker, Electromyography. [2004])", LEARNX - LEARN_SIZEX*3/8+530,LEARNY+155);
+        text("Konrad, P. The ABC of EMG. Noraxon Inc. [2006]", LEARNX - LEARN_SIZEX*3/8+420,LEARNY+380);
         
         textSize(28);
         text("EMG Demo", EMG_DEMOX,EMG_DEMOY);
@@ -240,13 +247,21 @@ public class DisplayController{
         
         emgGame.draw();
         
-        
-        textAlign(CENTER, CENTER);
+        fill(0xff,240);
+        textAlign(LEFT, CENTER);
         stroke(0);
         strokeWeight(3);
-        fill(0xff,240);
+        rect(width/2+300,height-450,400,400,40);
+        rect(60,height-450,320,200,40);
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
+        
         fill(0);
+        textSize(18);
+        text("Step 1: Place your arm inside the Y Brace\n\nStep 2: Clench fist and watch Mean Absolute Value increase\n\nStep 3: Click on the Mean Absolute Value graph to set the desired threshold. When the bar rises above the threshold, a mouse click is generated\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",width/2+315,height-450,380,400);
+        textAlign(CENTER, CENTER);
+        textSize(22);
+        text("The higher the contractile force, the higher the amplitude of the signal will be.",75,height-450,290,200);
+       
         textSize(20);
         text("Return", RETURNX,RETURNY);
         
@@ -269,7 +284,11 @@ public class DisplayController{
         textSize(18);
         text(ECGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
         image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
-        image(ecgSigImg,LEARNX - LEARN_SIZEX*3/8+100,LEARNY+230);
+        image(ecgSigImg,LEARNX - LEARN_SIZEX*3/8+230,LEARNY+220);
+        
+        textSize(10);
+        text("(American Heart Association [2015])", LEARNX - LEARN_SIZEX*3/8+550,LEARNY+200);
+        text("ekg.academy [2014]", LEARNX - LEARN_SIZEX*3/8+320,LEARNY+380);
         
         textSize(28);
         text("ECG Demo", ECG_DEMOX, ECG_DEMOY);
@@ -293,7 +312,19 @@ public class DisplayController{
         
         textSize(32);
         fill(0, 102, 153, 51);
-        text(line.getNumBeats()*60/REPEAT_TIME + " BPM", 250, 280);  // Specify a z-axis value
+        text(line.getNumBeats()*60/REPEAT_TIME + " BPM", 290, 270);  // Specify a z-axis value
+        
+        fill(0xff,240);
+        rect( width/4 - 50,height*3/4, 1100, 200,30);
+        fill(0);
+        textSize(18);
+        textAlign(CENTER,CENTER);
+        text("Place your hands on the bar with palms touching the front electrode and tips of the fingers touching the back electrode. Your ECG will be displayed on the graph above, to find an accurate Beats Per Minute (BPM), hold the bar for 20 seconds. A detection algorithm is used to identify when the beats occur, highlighted in blue. Try jogging on the spot to increase your heart rate and watch the difference.", width/4,height*3/4, 1000, 200);
+        
+        if(ECGOpen){
+          textSize(38);
+          text("Place your hands on the bar to display your ECG",width/2,height/2);
+        }
         
         break;
     }
@@ -313,7 +344,7 @@ public class DisplayController{
         
         break;
       case EMG:
-        if(currentScreen == DisplayScreen.EMG_DEMO){
+        if(currentScreen == DisplayScreen.EMG_DEMO){ //if returning from the EMG demo, tell the arduino to change states
           myPort.write("NONE");
           myPort.clear(); 
         }
@@ -322,8 +353,8 @@ public class DisplayController{
         
         break;
       case EMG_DEMO:
-        bar = new BarGraph(450,height-40, 200, 1000,350,"Enveloped Signal");
-        line = new LineGraph(60,height-40,350,350,350,-150,150,"Raw Signal",false);
+        bar = new BarGraph(width/2-100,height-40, 200, 1000,350,"Integrated Absoulte Value");
+        line = new LineGraph(width/2-500,height-40,350,350,350,-150,150,"EMG Signal",false);
         emgGame =  new FlappyRaven(400,100);
 
         currentScreen = DisplayScreen.EMG_DEMO;
@@ -331,7 +362,7 @@ public class DisplayController{
         myPort.clear();
         break;
       case ECG:
-        if(currentScreen == DisplayScreen.ECG_DEMO){
+        if(currentScreen == DisplayScreen.ECG_DEMO){ //if returning from the ECG demo, tell the arduino to change states
           myPort.write("NONE");
           myPort.clear(); 
         }
@@ -373,7 +404,9 @@ public class DisplayController{
         }
         break;
       case EMG_DEMO:
-        if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
+        if(emgGame.gameInProgress() == true){
+          emgGame.mouseClicked(); 
+        }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
           switchTo(DisplayScreen.EMG);
         }else if(bar.insideGraph(mouseX,mouseY)){
           bar.setThreshold(mouseY);

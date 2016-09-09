@@ -3,6 +3,10 @@
  * This class creates a bar graph of a given size which can trigger upon certain events (Rising/Falling edge, etc.)
  * The location given becomes the bottom left corner of the Bar Graph.
  */
+ 
+ 
+final static boolean hideNumbers = false;
+ 
 class BarGraph{
   String title;
   int x,y; //base x and y coordinates of the graph
@@ -65,14 +69,17 @@ class BarGraph{
     line(x+50,y,x+50,y-size-5);
     line(x+25,y,x+size,y);
     
-    //draw y axis ticks
-    text(nf(valMax,3,0), x+18, y-size-2);
+    //draw y axis ticks and numbers
+    if(!hideNumbers){
+      text(nf(valMax,3,0), x+18, y-size-2);
+      text(nf(valMax*3/4,3,0), x+18, y-size*3/4-2);
+      text(nf(valMax/2,3,0), x+18, y-size/2-2);
+      text(nf(valMax*1/4,3,0), x+18, y-size*1/4-2);
+    }
+    
     line(x+45,y-size,x+55,y-size);
-    text(nf(valMax*3/4,3,0), x+18, y-size*3/4-2);
     line(x+45,y-size*3/4,x+55,y-size*3/4);
-    text(nf(valMax/2,3,0), x+18, y-size/2-2);
     line(x+45,y-size/2,x+55,y-size/2);
-    text(nf(valMax*1/4,3,0), x+18, y-size*1/4-2);
     line(x+45,y-size*1/4, x+55, y-size*1/4);
     
     
@@ -81,12 +88,21 @@ class BarGraph{
     stroke(162,11,11);
     fill(119,11,11);
     line(x+45,y-normThresh,x+size,y-normThresh);
-    text(nf(threshold,3,0),x+size-20,y-normThresh-10);
+    text("threshold",x+size-75,y-normThresh-10);
+    if(!hideNumbers)
+      text(nf(threshold,3,0),x+size-20,y-normThresh-10);
     
+    
+    
+    if(val < threshold){
+      fill(0);
+      stroke(0);
+    }
     //draw the bar
     float normVal = map(val,0,valMax,0,size);
     rect(x+size/3,y,barWidth,-normVal);
-    text(nf(val,3,0),x+size/3+20,y-normVal-10);
+    if(!hideNumbers)
+      text(nf(val,3,0),x+size/3+20,y-normVal-10);
     
   }
   

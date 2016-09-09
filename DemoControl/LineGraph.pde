@@ -1,6 +1,6 @@
 
 static final int MOBD_THRESH = 250;
-static final int REFRACT_PERIOD = 30;
+static final int REFRACT_PERIOD = 40;
 
 /*
  * This class displays data in a line graph
@@ -14,9 +14,8 @@ class LineGraph{
   float yData[];
   float yMin, yMax;
   int currX; // the next data to be updated
-  float MOBDx[];
-  float MOBDy[];
-  float MOBDz[];
+  float panX[];
+  float panY[];
   int beatLoc[];
   int numBeats = 0;
   
@@ -38,9 +37,8 @@ class LineGraph{
     xLength = xLen;
     yLength = yLen;
     yData = new float[size];
-    MOBDx = new float[size];
-    MOBDy = new float[size];
-    MOBDz = new float[size];
+    panX = new float[size];
+    panY = new float[size];
     this.title = title;
     beatLoc = new int[400]; //shouldn't get anywhere close to 400 beats
     this.yMin = yMin;
@@ -65,17 +63,17 @@ class LineGraph{
   void panThompkins(){
 
    
-   MOBDx[currX] = yData[currX] - yData[(currX-1+yData.length)% yData.length];
-   MOBDx[currX] *= MOBDx[currX];
+   panX[currX] = yData[currX] - yData[(currX-1+yData.length)% yData.length];
+   panX[currX] *= panX[currX];
    
 
   //moving average
    int n = 20;
-   MOBDz[currX] = 0;
+   panY[currX] = 0;
    for(int j = n; j > 0; j--){
-       MOBDz[currX] += MOBDx[(currX-j+yData.length) % yData.length]; 
+       panY[currX] += panX[(currX-j+yData.length) % yData.length]; 
     }
-    MOBDz[currX]=MOBDz[currX]/n;
+    panY[currX]=panY[currX]/n;
    
    
    //find the peak and threasholds based off the past 200 samples
@@ -83,8 +81,8 @@ class LineGraph{
    for(int i = 0; i < 200; i++){
      PEAKI = 0;
     for(int j = n; j >= 0; j--){
-        if(MOBDz[(currX-i+yData.length) % yData.length] > PEAKI)
-          PEAKI = MOBDz[(currX-i+yData.length) % yData.length];
+        if(panY[(currX-i+yData.length) % yData.length] > PEAKI)
+          PEAKI = panY[(currX-i+yData.length) % yData.length];
     }
      //PEAKI /= n;
      
@@ -121,7 +119,7 @@ class LineGraph{
       QRSFound = false;
       for(int j =0; j < 100; j++){
         t2 = t1;
-        t1 = MOBDz[(i+j+yData.length) % yData.length];
+        t1 = panY[(i+j+yData.length) % yData.length];
         if(t2 < THRESH1 && t1 > THRESH1 && refract == 0){
           numBeats++;
           beatLoc[c++] = i+j;
@@ -133,7 +131,7 @@ class LineGraph{
       if(!QRSFound){
        for(int j =0; j < 100; j++){
          t2 = t1;
-         t1 = MOBDz[(i+j+yData.length) % yData.length];
+         t1 = panY[(i+j+yData.length) % yData.length];
          if(t2 < THRESH2 && t1 > THRESH2 && refract == 0){
            numBeats++;
            beatLoc[c++] = i+j;
@@ -161,21 +159,24 @@ class LineGraph{
     //line(x,y-THRESH2,x+xLength,y-THRESH2);
     //line(x+currX-100, 0,x+currX-100, height);
     
-    stroke(20);
-    fill(0, 102, 153, 20);
+    //draw a box around where the algorithm thinks the heart beats are
+    noStroke();
+    fill(0, 102, 153, 50);
     for(int i = 0; i < beatLoc.length;i++){
       if(beatLoc[i]==0) continue;
       rect(x+beatLoc[i]-8,y,16,-yLength+100);
     }
 
-    
+    //can either show the raw signal or the processed signal for detecting the QRS curve
+    stroke(0);
     if(!showMOBD){    
      for(int i=0; i< yData.length-1; ++i){
-       line(x+(xLength/yData.length)*i,y - map(yData[i],yMin,yMax,0,yLength), x+(xLength/yData.length)*(i+1),y - map(yData[i+1],yMin,yMax,0,yLength));
+       if(i<(currX-25+xLength)%xLength || i > currX)
+         line(x+(xLength/yData.length)*i,y - map(yData[i],yMin,yMax,0,yLength), x+(xLength/yData.length)*(i+1),y - map(yData[i+1],yMin,yMax,0,yLength));
      }
     }else{
      for(int i=0; i< yData.length-1; ++i){
-       line(x+(xLength/yData.length)*i,y - MOBDz[i], x+(xLength/yData.length)*(i+1),y - MOBDz[i+1]);
+       line(x+(xLength/yData.length)*i,y - panY[i], x+(xLength/yData.length)*(i+1),y - panY[i+1]);
      }
     }
 

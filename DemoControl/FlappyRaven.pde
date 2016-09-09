@@ -36,6 +36,10 @@ public class FlappyRaven{
   void mouseClicked(){
     game.jump();
   }
+  
+  public boolean gameInProgress(){
+      return !game.getGameOver();
+    }
 
   class Game{
     ArrayList<Bar> bars = new ArrayList<Bar>();
@@ -135,6 +139,10 @@ public class FlappyRaven{
       }else if(millis() - time > 1000){
         startGame();
       }
+    }
+    
+    public boolean getGameOver(){
+      return gameOver;
     }
   }
   

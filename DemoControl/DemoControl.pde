@@ -55,7 +55,8 @@ public class DisplayController{
   final int ECG_BUTTONX = displayWidth/4;
   final int ECG_BUTTONY = displayHeight/2;
   final int BUTTONSIZE_1 = 400;
-  final int BUTTONSIZE_2 = 100;
+  final int BUTTONSIZE_2 = 100; //return button
+  final int BUTTONSIZE_3 = 70; //home button
   
   final int LEARNX = displayWidth/3;
   final int LEARNY = displayHeight/2;
@@ -69,6 +70,8 @@ public class DisplayController{
   final int ECG_DEMOY = displayHeight/2;
   final int RETURNX = displayWidth-100;
   final int RETURNY = displayHeight-100;
+  final int HOMEX = displayWidth-100;
+  final int HOMEY = displayHeight-200;
   
   final int FLAPPYX = 400;
   final int FLAPPYY = 100;
@@ -83,6 +86,8 @@ public class DisplayController{
          lightbulbImg,
          emgSigImg,
          ecgSigImg,
+         returnImg,
+         homeImg,
          bg; //display the images for the current screen
   
   Serial myPort;        // The serial port
@@ -94,7 +99,7 @@ public class DisplayController{
   
   public DisplayController(Serial port){
     currentScreen = DisplayScreen.NONE;
-    bg = loadImage("MainBackground.jpg");
+    bg = loadImage("MainBackground.png");
     heartImg = loadImage("heart3.png");
     heartImg.resize(0,300);
     muscleImg = loadImage("muscle.png");
@@ -104,6 +109,10 @@ public class DisplayController{
     emgSigImg = loadImage("emgSignal.png");
     ecgSigImg = loadImage("ecgSignal.png");
     ecgSigImg.resize(0,150);
+    returnImg = loadImage("return.png");
+    returnImg.resize(0,50);
+    homeImg = loadImage("home.png");
+    homeImg.resize(0,50);
     
     String[] t = loadStrings("ECG.txt");
     for(int i = 0; i < t.length; i++){
@@ -184,13 +193,13 @@ public class DisplayController{
       case NONE:
         fill(0xff,180);
         strokeWeight(0);        
-        rect(displayWidth*0.07, displayHeight*0.07, displayWidth*0.86, displayHeight*0.86, 250);
+        rect(displayWidth*0.07, displayHeight*0.135, displayWidth*0.86, displayHeight*0.79, 250);
         strokeWeight(3);
-        rect(displayWidth*0.0625, displayHeight*0.0625, displayWidth*0.875, displayHeight*0.875, 250);
+        rect(displayWidth*0.0625, displayHeight*0.12, displayWidth*0.875, displayHeight*0.82, 250);
         
         textSize(38);
         fill(0);
-        text("Choose an option to Demo", displayWidth/2, displayHeight*0.125);
+        text("Choose an option to Demo", displayWidth/2, displayHeight*0.19);
         
         fill(0xff,180);
         textSize(28);
@@ -214,6 +223,7 @@ public class DisplayController{
         ellipse(EMG_DEMOX, EMG_DEMOY, BUTTONSIZE_1, BUTTONSIZE_1);
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         
+        
         //Info Container
         //fill(0xff);
         rect(LEARNX - LEARN_SIZEX/2,LEARNY - LEARN_SIZEY/2, LEARN_SIZEX, LEARN_SIZEY,40);
@@ -234,8 +244,8 @@ public class DisplayController{
         textSize(28);
         text("EMG Demo", EMG_DEMOX,EMG_DEMOY);
         
-        textSize(20);
-        text("Return", RETURNX,RETURNY);
+        image(returnImg,RETURNX-16,RETURNY-20);
+        
         
         break;
         
@@ -254,17 +264,17 @@ public class DisplayController{
         rect(width/2+300,height-450,400,400,40);
         rect(60,height-450,320,200,40);
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
+        ellipse(HOMEX, HOMEY, BUTTONSIZE_3, BUTTONSIZE_3);
         
         fill(0);
         textSize(18);
         text("Step 1: Place your arm inside the Y Brace\n\nStep 2: Clench fist and watch Mean Absolute Value increase\n\nStep 3: Click on the Mean Absolute Value graph to set the desired threshold. When the bar rises above the threshold, a mouse click is generated\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",width/2+315,height-450,380,400);
         textAlign(CENTER, CENTER);
         textSize(22);
-        text("The higher the contractile force, the higher the amplitude of the signal will be.",75,height-450,290,200);
+        text("If you squeeze harder the amplitude will rise!",75,height-450,290,200);
        
-        textSize(20);
-        text("Return", RETURNX,RETURNY);
-        
+        image(returnImg,RETURNX-16,RETURNY-20);
+        image(homeImg,HOMEX-23,HOMEY-26);
         break;
         
       //This is the ECG screen. It displays information about what ECG is and has two buttons: ECG Demo and Return
@@ -293,7 +303,7 @@ public class DisplayController{
         textSize(28);
         text("ECG Demo", ECG_DEMOX, ECG_DEMOY);
         textSize(20);
-        text("Return", RETURNX,RETURNY);
+        image(returnImg,RETURNX-16,RETURNY-20);
         
         break;
       
@@ -305,9 +315,10 @@ public class DisplayController{
         strokeWeight(3);
         fill(0xff,240);
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
+        ellipse(HOMEX, HOMEY, BUTTONSIZE_3, BUTTONSIZE_3);
         fill(0);
-        textSize(20);
-        text("Return", RETURNX,RETURNY);
+        image(returnImg,RETURNX-16,RETURNY-20);
+        image(homeImg,HOMEX-23,HOMEY-26);
         stroke(0);
         
         textSize(32);
@@ -334,6 +345,11 @@ public class DisplayController{
    * This function is called to switch between screens. It is responsible for sending data to the Arduino to tell it to switch modes too. It creates the graphs and game for the demo.
    */
   private void switchTo(DisplayScreen ds){
+    if(currentScreen == DisplayScreen.EMG_DEMO || currentScreen == DisplayScreen.ECG_DEMO){ //if returning from the EMG demo, tell the arduino to change states
+      myPort.write("NONE");
+      myPort.clear(); 
+    }
+    
      switch(ds){
       case NONE:
         
@@ -344,16 +360,13 @@ public class DisplayController{
         
         break;
       case EMG:
-        if(currentScreen == DisplayScreen.EMG_DEMO){ //if returning from the EMG demo, tell the arduino to change states
-          myPort.write("NONE");
-          myPort.clear(); 
-        }
+
         currentScreen = DisplayScreen.EMG;
         
         
         break;
       case EMG_DEMO:
-        bar = new BarGraph(width/2-100,height-40, 200, 1000,350,"Integrated Absoulte Value");
+        bar = new BarGraph(width/2-100,height-40, 200, 1000,350,"Amplified, Rectified, Integrated Signal");
         line = new LineGraph(width/2-500,height-40,350,350,350,-150,150,"EMG Signal",false);
         emgGame =  new FlappyRaven(400,100);
 
@@ -362,10 +375,6 @@ public class DisplayController{
         myPort.clear();
         break;
       case ECG:
-        if(currentScreen == DisplayScreen.ECG_DEMO){ //if returning from the ECG demo, tell the arduino to change states
-          myPort.write("NONE");
-          myPort.clear(); 
-        }
         currentScreen = DisplayScreen.ECG;
 
         break;
@@ -408,6 +417,8 @@ public class DisplayController{
           emgGame.mouseClicked(); 
         }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
           switchTo(DisplayScreen.EMG);
+        }else if((mouseX-HOMEX)*(mouseX-HOMEX) + (mouseY- HOMEY)*(mouseY- HOMEY) <= BUTTONSIZE_3/2*BUTTONSIZE_3/2){
+          switchTo(DisplayScreen.NONE);
         }else if(bar.insideGraph(mouseX,mouseY)){
           bar.setThreshold(mouseY);
           myPort.write("THRSH:" + str(bar.getThreshold()));
@@ -429,6 +440,8 @@ public class DisplayController{
       case ECG_DEMO:
         if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
           switchTo(DisplayScreen.ECG);
+        }else if((mouseX-HOMEX)*(mouseX-HOMEX) + (mouseY- HOMEY)*(mouseY- HOMEY) <= BUTTONSIZE_3/2*BUTTONSIZE_3/2){
+          switchTo(DisplayScreen.NONE);
         }
         break;
     }

@@ -118,9 +118,9 @@ public class FlappyRaven{
     private Bar makeBar(int x){
       int size = difficulty/20;
       int pos = (int)r.nextInt(((yLen)-size-bgGroundLevel-5));
-      if(pos<25+flappyY) pos = 25+flappyY;
-      if(pos > (flappyY+yLen-size-65)) pos = flappyY+yLen-size-bgGroundLevel-5;
-      //System.out.print(difficulty/25);
+      
+      if(pos<25) pos = 25;
+      if(pos > (yLen-size-65)) pos = yLen-size-bgGroundLevel-5;
       return new Bar(x,size,pos);
     }
     

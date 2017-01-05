@@ -5,11 +5,17 @@ DisplayController controller;
 String inString;
 Serial myPort;
 
+static final int TIMEOUT = 60*240; //60 frames per second * 240 seconds (3 minutes)
+int timer;
+
+final static boolean Debug = true; //Debug should be true when no arduino is attached
 
 public void settings() {
   //size(2200,1000); 
   fullScreen();
 
+  
+  timer = 0;
   
   if(myPort.list().length >= 3){
     myPort = new Serial(this, myPort.list()[myPort.list().length - 1], 9600); 
@@ -18,7 +24,8 @@ public void settings() {
     myPort.write("NONE");
   }else{
     println("No Arduino Connected");
-    exit();
+    if(!Debug) //If not in debug mode, then arduino should be connected to work
+      exit();
     myPort = null; 
   }
 
@@ -31,11 +38,20 @@ void draw(){
   //   inString = myPort.readStringUntil('\n');
   //}
   //controller.update(inString);
+  timer++;
+  if (timer >= TIMEOUT)
+    exit();
+  
   controller.draw();
 }
 
 void mouseReleased(){
+  timer= 0;
  controller.buttonCheck(); 
+}
+
+void mouseMoved(){
+ timer = 0; 
 }
 
 void serialEvent (Serial myPort) {
@@ -50,6 +66,8 @@ void serialEvent (Serial myPort) {
 public class DisplayController{
   
   //These store the locations of the buttons
+  
+  /* This is for Portrait Mode */
   final int EMG_BUTTONX = displayWidth*3/4;
   final int EMG_BUTTONY = displayHeight/2;
   final int ECG_BUTTONX = displayWidth/4;
@@ -73,12 +91,49 @@ public class DisplayController{
   final int HOMEX = displayWidth-100;
   final int HOMEY = displayHeight-200;
   
-  final int FLAPPYX = 400;
-  final int FLAPPYY = 100;
-  final int EMG_BARX = width/2-100;
-  final int EMG_BARY = height-40;
-  final int EMG_LINEX = width/2-500;
-  final int EMG_LINEY = height-40;
+  final int FLAPPYX = (displayWidth - 1000)/2;
+  final int FLAPPYY = (displayHeight - 500)/2;
+  final int EMG_BARX = displayWidth/2-100;
+  final int EMG_BARY = displayHeight-40;
+  final int EMG_LINEX = displayWidth/2-500;
+  final int EMG_LINEY = displayHeight-40;
+  final int EMG_INFOX = displayWidth*5/100;
+  final int EMG_INFOY = displayHeight*1/10;
+  final int EMG_STEPSX = displayWidth*6/10;
+  final int EMG_STEPSY = displayHeight*1/10;
+  
+
+  
+  /* This is for Landscape Mode */
+  //final int EMG_BUTTONX = displayWidth*3/4;
+  //final int EMG_BUTTONY = displayHeight/2;
+  //final int ECG_BUTTONX = displayWidth/4;
+  //final int ECG_BUTTONY = displayHeight/2;
+  //final int BUTTONSIZE_1 = 400;
+  //final int BUTTONSIZE_2 = 100; //return button
+  //final int BUTTONSIZE_3 = 70; //home button
+  
+  //final int LEARNX = displayWidth/3;
+  //final int LEARNY = displayHeight/2;
+  //final int LEARN_SIZEY = 800;
+  //final int LEARN_SIZEX = 900;
+  //final int ECG_LEARNABOUTX = displayWidth/4;
+  //final int ECG_LEARNABOUTY = displayHeight/2;
+  //final int EMG_DEMOX = displayWidth*3/4;
+  //final int EMG_DEMOY = displayHeight/2;
+  //final int ECG_DEMOX = displayWidth*3/4;
+  //final int ECG_DEMOY = displayHeight/2;
+  //final int RETURNX = displayWidth-100;
+  //final int RETURNY = displayHeight-100;
+  //final int HOMEX = displayWidth-100;
+  //final int HOMEY = displayHeight-200;
+  
+  //final int FLAPPYX = 400;
+  //final int FLAPPYY = 100;
+  //final int EMG_BARX = width/2-100;
+  //final int EMG_BARY = height-40;
+  //final int EMG_LINEX = width/2-500;
+  //final int EMG_LINEY = height-40;
   
   static final int REPEAT_TIME = 15; //in seconds
   
@@ -103,7 +158,7 @@ public class DisplayController{
   
   public DisplayController(Serial port){
     currentScreen = DisplayScreen.NONE;
-    bg = loadImage("MainBackground.png");
+    bg = loadImage("Portrait.png");
     heartImg = loadImage("heart3.png");
     heartImg.resize(0,300);
     muscleImg = loadImage("muscle.png");
@@ -127,6 +182,7 @@ public class DisplayController{
     for(int i = 0; i < t.length; i++){
       EMGInfo += t[i] + "\n";
     }
+    
     
     myPort = port;
   }
@@ -265,17 +321,17 @@ public class DisplayController{
         textAlign(LEFT, CENTER);
         stroke(0);
         strokeWeight(3);
-        rect(width/2+300,height-450,400,400,40);
-        rect(60,height-450,320,200,40);
+        rect(EMG_STEPSX,EMG_STEPSY,400,400,40);
+        rect(EMG_INFOX,EMG_INFOY,320,200,40);
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         ellipse(HOMEX, HOMEY, BUTTONSIZE_3, BUTTONSIZE_3);
         
         fill(0);
         textSize(18);
-        text("Step 1: Place your arm inside the Y Brace\n\nStep 2: Clench fist and watch Mean Absolute Value increase\n\nStep 3: Click on the Mean Absolute Value graph to set the desired threshold. When the bar rises above the threshold, a mouse click is generated\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",width/2+315,height-450,380,400);
+        text("Step 1: Place your arm inside the Y Brace\n\nStep 2: Clench fist and watch Mean Absolute Value increase\n\nStep 3: Click on the Mean Absolute Value graph to set the desired threshold. When the bar rises above the threshold, a mouse click is generated\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",EMG_STEPSX + 15,EMG_STEPSY,380,400);
         textAlign(CENTER, CENTER);
         textSize(22);
-        text("If you squeeze harder the amplitude will rise!",75,height-450,290,200);
+        text("If you squeeze harder the amplitude will rise!",EMG_INFOX + 15,EMG_INFOY,290,200);
        
         image(returnImg,RETURNX-16,RETURNY-20);
         image(homeImg,HOMEX-23,HOMEY-26);
@@ -349,9 +405,12 @@ public class DisplayController{
    * This function is called to switch between screens. It is responsible for sending data to the Arduino to tell it to switch modes too. It creates the graphs and game for the demo.
    */
   private void switchTo(DisplayScreen ds){
-    if(currentScreen == DisplayScreen.EMG_DEMO || currentScreen == DisplayScreen.ECG_DEMO){ //if returning from the EMG demo, tell the arduino to change states
-      myPort.write("NONE");
-      myPort.clear(); 
+    
+    if(!Debug){
+      if(currentScreen == DisplayScreen.EMG_DEMO || currentScreen == DisplayScreen.ECG_DEMO){ //if returning from the EMG demo, tell the arduino to change states
+        myPort.write("NONE");
+        myPort.clear(); 
+      }
     }
     
      switch(ds){
@@ -375,8 +434,10 @@ public class DisplayController{
         emgGame =  new FlappyRaven(FLAPPYX,FLAPPYY);
 
         currentScreen = DisplayScreen.EMG_DEMO;
-        myPort.write("EMG");
-        myPort.clear();
+        if(!Debug){
+          myPort.write("EMG");
+          myPort.clear();
+        }
         break;
       case ECG:
         currentScreen = DisplayScreen.ECG;
@@ -387,8 +448,10 @@ public class DisplayController{
         line = new LineGraph(200,700,REPEAT_TIME*100,400,REPEAT_TIME*100,0, 1100,"ECG Data",true);
         currentScreen = DisplayScreen.ECG_DEMO;
         
-        myPort.write("ECG");
-        myPort.clear();
+        if(!Debug){
+          myPort.write("ECG");
+          myPort.clear();
+        }
         break;
      }
   }
@@ -425,7 +488,8 @@ public class DisplayController{
           switchTo(DisplayScreen.NONE);
         }else if(bar.insideGraph(mouseX,mouseY)){
           bar.setThreshold(mouseY);
-          myPort.write("THRSH:" + str(bar.getThreshold()));
+          if(!Debug)
+            myPort.write("THRSH:" + str(bar.getThreshold()));
           //println("THRSH:" + str(bar.getThreshold()));
         }else if(mouseX > FLAPPYX && mouseX < FLAPPYX + 1000 && mouseY > FLAPPYY && mouseY < FLAPPYY + 500){
           emgGame.mouseClicked(); 

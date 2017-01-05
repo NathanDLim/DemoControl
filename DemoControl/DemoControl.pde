@@ -5,8 +5,8 @@ DisplayController controller;
 String inString;
 Serial myPort;
 
-static final int TIMEOUT = 60*240; //60 frames per second * 240 seconds (3 minutes)
-int timer;
+static final int TIMEOUT = 60*240; //How long the application should wait with no interaction before closing. 60 frames per second * 240 seconds (3 minutes)
+int timer; //counter for timeout
 
 final static boolean Debug = true; //Debug should be true when no arduino is attached
 
@@ -34,10 +34,6 @@ public void settings() {
 
 void draw(){
 
-  //if(myPort.available() > 0){
-  //   inString = myPort.readStringUntil('\n');
-  //}
-  //controller.update(inString);
   timer++;
   if (timer >= TIMEOUT)
     exit();
@@ -46,12 +42,12 @@ void draw(){
 }
 
 void mouseReleased(){
-  timer= 0;
+ timer= 0; //reset timer when mouse is clicked & released
  controller.buttonCheck(); 
 }
 
 void mouseMoved(){
- timer = 0; 
+ timer = 0;  //reset timer when mouse is moved
 }
 
 void serialEvent (Serial myPort) {

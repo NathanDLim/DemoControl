@@ -75,6 +75,10 @@ public class DisplayController{
   
   final int FLAPPYX = 400;
   final int FLAPPYY = 100;
+  final int EMG_BARX = width/2-100;
+  final int EMG_BARY = height-40;
+  final int EMG_LINEX = width/2-500;
+  final int EMG_LINEY = height-40;
   
   static final int REPEAT_TIME = 15; //in seconds
   
@@ -366,9 +370,9 @@ public class DisplayController{
         
         break;
       case EMG_DEMO:
-        bar = new BarGraph(width/2-100,height-40, 200, 1000,350,"Amplified, Rectified, Integrated Signal");
-        line = new LineGraph(width/2-500,height-40,350,350,350,-150,150,"EMG Signal",false);
-        emgGame =  new FlappyRaven(400,100);
+        bar = new BarGraph(EMG_BARX,EMG_BARY, 200, 1000,350,"Amplified, Rectified, Integrated Signal");
+        line = new LineGraph(EMG_LINEX,EMG_LINEY,350,350,350,-150,150,"EMG Signal",false);
+        emgGame =  new FlappyRaven(FLAPPYX,FLAPPYY);
 
         currentScreen = DisplayScreen.EMG_DEMO;
         myPort.write("EMG");

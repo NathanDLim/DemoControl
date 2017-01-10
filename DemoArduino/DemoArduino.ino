@@ -22,8 +22,8 @@ int env;
 mode_t currMode;
 
 /*
- * This class is to filter the incoming data from the heart rate monitor and remove unneccesary noise
- */
+   This class is to filter the incoming data from the heart rate monitor and remove unneccesary noise
+*/
 class DynamicFilter
 {
   private:
@@ -33,71 +33,71 @@ class DynamicFilter
     float b[7];
     int arrLen;
 
-    
-  public:  
-  /*
-   * Constructor for the Filter
-   * Assigns the a and b values, a and b must have 3 values each. a[0] must be 1.
-   */
-  DynamicFilter(float aValues[],float bValues[],int baSize)
-  {    
-    arrLen = baSize-1;
-    if(arrLen > 7)
-      arrLen = 7;
-    
-    for(int i = 0;i<arrLen;i++)
+
+  public:
+    /*
+       Constructor for the Filter
+       Assigns the a and b values, a and b must have 3 values each. a[0] must be 1.
+    */
+    DynamicFilter(float aValues[], float bValues[], int baSize)
     {
-      a[i] = aValues[i];
-      b[i] = bValues[i];
-      oldx[i] = 0;
-      oldy[i] = 0;
+      arrLen = baSize - 1;
+      if (arrLen > 7)
+        arrLen = 7;
+
+      for (int i = 0; i < arrLen; i++)
+      {
+        a[i] = aValues[i];
+        b[i] = bValues[i];
+        oldx[i] = 0;
+        oldy[i] = 0;
+      }
+
+
+      a[arrLen] = aValues[arrLen];
+      b[arrLen] = bValues[arrLen];
     }
 
 
-    a[arrLen] = aValues[arrLen];
-    b[arrLen] = bValues[arrLen];
-  }
-
-
-  /*
-   * When a new value is added, it performs the IIR filter
-   */
- void addValue(int in)
-  {    
-    
-    float newY = in*b[0];// + oldx[0]*b[1] + oldx[1]*b[2] - oldy[0]*a[1] - oldy[1]*a[2];
-    
-    for(int i = arrLen;i>=1;i--)
+    /*
+       When a new value is added, it performs the IIR filter
+    */
+    void addValue(int in)
     {
-      newY += oldx[i-1]*b[i] - oldy[i-1]*a[i];
+
+      float newY = in * b[0]; // + oldx[0]*b[1] + oldx[1]*b[2] - oldy[0]*a[1] - oldy[1]*a[2];
+
+      for (int i = arrLen; i >= 1; i--)
+      {
+        newY += oldx[i - 1] * b[i] - oldy[i - 1] * a[i];
+      }
+
+
+
+      for (int i = arrLen - 1; i >= 1; i--)
+      {
+        oldy[i] = oldy[i - 1];
+        oldx[i] = oldx[i - 1];
+      }
+
+      oldy[0] = newY;
+      oldx[0] = in;
+
     }
 
-
-
-    for(int i = arrLen-1;i>=1;i--)
+    /*
+       @return y_1 and y_2 as a string
+    */
+    String getLastTwoValues()
     {
-      oldy[i] = oldy[i-1];
-      oldx[i] = oldx[i-1];
+      return String(oldy[0]) + " " + String(oldy[1]);
     }
 
-    oldy[0] = newY;
-    oldx[0] = in;
+    String getLastValue()
+    {
+      return String(oldy[0]);
+    }
 
-  }
-
-  /*
-   * @return y_1 and y_2 as a string
-   */
-  String getLastTwoValues()
-  {
-    return String(oldy[0]) + " " + String(oldy[1]); 
-  }
-
-  String getLastValue()
-  {
-    return String(oldy[0]);
-  }
-  
 };
 
 
@@ -116,7 +116,7 @@ class DynamicFilter
 float a[] = {1.0f, -0.2776, 0.6048, -0.1560, 0.4314, -0.0458, 0.0563}; //butter third order 35-85Hz Notch filter with 250 Hz sampling
 float b[] = {0.2569, -0.1196, 0.7893, -0.24002, 0.7893, -0.1196, 0.2569};
 
-float a2[] = {1.0f, 0.3459, 0.3650, 0.0323, 0,0, 0}; //butter third order 100Hz high-pass filter with 250 Hz sampling
+float a2[] = {1.0f, 0.3459, 0.3650, 0.0323, 0, 0, 0}; //butter third order 100Hz high-pass filter with 250 Hz sampling
 float b2[] = {0.1234, -0.3701, 0.3701, -0.1234, 0, 0, 0};
 
 //float a[3] = {0.0f,0.f,0.f}; //No Filter
@@ -129,27 +129,27 @@ int timer1_counter;
 
 
 //Filter notchF(a,b);
-DynamicFilter ecgFilter(a,b,7);
-DynamicFilter emgFilter(a2,b2,7);
+DynamicFilter ecgFilter(a, b, 7);
+DynamicFilter emgFilter(a2, b2, 7);
 
 
 
-void enableRead(bool en){
-  if(en){
+void enableRead(bool en) {
+  if (en) {
     noInterrupts();           // disable all interrupts
     TCCR1A = 0;
     TCCR1B = 0;
-  
+
     // Set timer1_counter to the correct value for our interrupt interval
-  //  timer1_counter = 65223;   // preload timer 65536-16MHz/256/200Hz
+    //  timer1_counter = 65223;   // preload timer 65536-16MHz/256/200Hz
     timer1_counter = 65286;   // preload timer 65536-16MHz/256/250Hz
-  //  timer1_counter = 65380;   // preload timer 65536-16MHz/256/400Hz
-    
+    //  timer1_counter = 65380;   // preload timer 65536-16MHz/256/400Hz
+
     TCNT1 = timer1_counter;   // preload timer
-    TCCR1B |= (1 << 2);    // 256 prescaler 
+    TCCR1B |= (1 << 2);    // 256 prescaler
     TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
     interrupts();             // enable all interrupts
-  }else{
+  } else {
     noInterrupts();           // disable all interrupts
     TCCR1A = 0;
     TCCR1B = 0;
@@ -159,17 +159,17 @@ void enableRead(bool en){
 
 
 
-ISR(TIMER1_OVF_vect)        // interrupt service routine 
+ISR(TIMER1_OVF_vect)        // interrupt service routine
 {
   TCNT1 = timer1_counter;   // preload timer
-  if(currMode == ECG){
+  if (currMode == ECG) {
     ecgFilter.addValue(analogRead(ECG_SIG_PIN));
-  }else if(currMode == EMG){
+  } else if (currMode == EMG) {
     emgFilter.addValue(analogRead(EMG_RAW_PIN));
   }
 }
 
-  
+
 
 
 
@@ -180,84 +180,84 @@ void setup() {
   pinMode(ECG_NOSIG_PIN1, INPUT); // Setup for leads off detection LO +
   pinMode(ECG_NOSIG_PIN2, INPUT); // Setup for leads off detection LO -
   enableRead(false);
-  
+
   oldEnv = 0;
   env = 0;
-  
-  pinMode(EMG_RAW_PIN, INPUT);   
-  pinMode(EMG_ENV_PIN, INPUT);   
+
+  pinMode(EMG_RAW_PIN, INPUT);
+  pinMode(EMG_ENV_PIN, INPUT);
 
   currMode = NONE;
-  
+
   // initialize the serial communication
   Mouse.begin();
   Serial.begin(9600);
 }
 
 
-void loop() 
+void loop()
 {
   //Start sending data if a '1' is sent. Stop sending data if a '0' is sent
-  if(Serial.available())
+  if (Serial.available())
   {
     String s = Serial.readString();
-    switch(currMode){
+    switch (currMode) {
       case NONE:
-        if(s.equals("EMG")){
+        if (s.equals("EMG")) {
           currMode = EMG;
           threshold = 200.0;
           enableRead(true);
-        }else if(s.equals("ECG")){
+        } else if (s.equals("ECG")) {
           currMode = ECG;
           enableRead(true);
         }
         break;
       case ECG:
-        if(s.equals("NONE")){
+        if (s.equals("NONE")) {
           currMode = NONE;
           enableRead(false);
         }
       case EMG:
-        if(s.equals("NONE")){
+        if (s.equals("NONE")) {
           currMode = NONE;
           enableRead(false);
-        }else if(s.substring(0,6).equals("THRSH:")){
+        } else if (s.substring(0, 6).equals("THRSH:")) {
           threshold = s.substring(6).toFloat();
         }
     }
     Serial.println(currMode);
   }
-  
 
 
-  switch(currMode){
+
+  switch (currMode) {
     case ECG:
 
-      if((digitalRead(ECG_NOSIG_PIN1) == 0) && (digitalRead(ECG_NOSIG_PIN2) == 0))
+      if ((digitalRead(ECG_NOSIG_PIN1) == 0) && (digitalRead(ECG_NOSIG_PIN2) == 0))
         Serial.println(ecgFilter.getLastValue());
       else
         Serial.println("!");
-        
+
       //Wait for a bit to keep serial data from saturating
       delay(ECG_PRINT_SPEED);
       break;
-      
+
     case EMG:
-    
-        oldEnv = env;
-        env = analogRead(EMG_ENV_PIN);
 
-        Serial.print(emgFilter.getLastValue());
-        Serial.print(" ");
-        Serial.println(env);
-      
-        if(oldEnv < threshold && env > threshold)
-          Mouse.click();
+      oldEnv = env;
+      env = analogRead(EMG_ENV_PIN);
 
-        //Wait for a bit to keep serial data from saturating
-        delay(EMG_PRINT_SPEED);
+      Serial.print(emgFilter.getLastValue());
+      Serial.print(" ");
+      Serial.println(env);
+
+      if (oldEnv < threshold && env > threshold)
+        Mouse.click();
+
+      //Wait for a bit to keep serial data from saturating
+      delay(EMG_PRINT_SPEED);
       break;
-      
+
     default:
       //Wait for a bit to keep serial data from saturating
       delay(ECG_PRINT_SPEED);

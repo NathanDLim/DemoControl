@@ -8,10 +8,9 @@ Serial myPort;
 static final int TIMEOUT = 60*240; //How long the application should wait with no interaction before closing. 60 frames per second * 240 seconds (3 minutes)
 int timer; //counter for timeout
 
-final static boolean Debug = true; //Debug should be true when no arduino is attached
+final static boolean Debug = false; //Debug should be true when no arduino is attached
 
 public void settings() {
-  //size(2200,1000); 
   fullScreen();
 
   
@@ -35,8 +34,11 @@ public void settings() {
 void draw(){
 
   timer++;
-  if (timer >= TIMEOUT)
+  if (timer >= TIMEOUT){
+    myPort.write("NONE");
+    myPort.clear(); 
     exit();
+  }
   
   controller.draw();
 }
@@ -64,24 +66,24 @@ public class DisplayController{
   //These store the locations of the buttons
   
   /* This is for Portrait Mode */
-  final int EMG_BUTTONX = displayWidth*3/4;
+  final int EMG_BUTTONX = displayWidth*70/100;
   final int EMG_BUTTONY = displayHeight/2;
-  final int ECG_BUTTONX = displayWidth/4;
+  final int ECG_BUTTONX = displayWidth*30/100;
   final int ECG_BUTTONY = displayHeight/2;
   final int BUTTONSIZE_1 = 400;
   final int BUTTONSIZE_2 = 100; //return button
   final int BUTTONSIZE_3 = 70; //home button
   
-  final int LEARNX = displayWidth/3;
-  final int LEARNY = displayHeight/2;
+  final int LEARNX = displayWidth/2;
+  final int LEARNY = displayHeight/3;
   final int LEARN_SIZEY = 800;
   final int LEARN_SIZEX = 900;
-  final int ECG_LEARNABOUTX = displayWidth/4;
-  final int ECG_LEARNABOUTY = displayHeight/2;
-  final int EMG_DEMOX = displayWidth*3/4;
-  final int EMG_DEMOY = displayHeight/2;
-  final int ECG_DEMOX = displayWidth*3/4;
-  final int ECG_DEMOY = displayHeight/2;
+  
+  
+  final int EMG_DEMOX = displayWidth/2;
+  final int EMG_DEMOY = displayHeight*3/4;
+  final int ECG_DEMOX = displayWidth/2;
+  final int ECG_DEMOY = displayHeight*3/4;
   final int RETURNX = displayWidth-100;
   final int RETURNY = displayHeight-100;
   final int HOMEX = displayWidth-100;
@@ -89,18 +91,21 @@ public class DisplayController{
   
   final int FLAPPYX = (displayWidth - 1000)/2;
   final int FLAPPYY = (displayHeight - 500)/2;
-  final int EMG_BARX = displayWidth/2-100;
+  final int EMG_BARX = displayWidth/2;
   final int EMG_BARY = displayHeight-40;
-  final int EMG_LINEX = displayWidth/2-500;
+  final int EMG_LINEX = displayWidth/2-400;
   final int EMG_LINEY = displayHeight-40;
   final int EMG_INFOX = displayWidth*5/100;
   final int EMG_INFOY = displayHeight*1/10;
   final int EMG_STEPSX = displayWidth*6/10;
   final int EMG_STEPSY = displayHeight*1/10;
   
-
+  final int ECG_DISPLAYX = (displayWidth-REPEAT_TIME*100)/2;
+  final int ECG_DISPLAYY = displayHeight*3/5;
+  final int ECG_LEARNABOUTX = displayWidth/2;
+  final int ECG_LEARNABOUTY = displayHeight*3/4;
   
-  /* This is for Landscape Mode */
+  /* This is for Landscape Mode - This will need to be updated if Landscape mode is desired */
   //final int EMG_BUTTONX = displayWidth*3/4;
   //final int EMG_BUTTONY = displayHeight/2;
   //final int ECG_BUTTONX = displayWidth/4;
@@ -131,7 +136,7 @@ public class DisplayController{
   //final int EMG_LINEX = width/2-500;
   //final int EMG_LINEY = height-40;
   
-  static final int REPEAT_TIME = 15; //in seconds
+  static final int REPEAT_TIME = 10; //in seconds
   
   DisplayScreen currentScreen;
   LineGraph line; //used for the ECG and EMG
@@ -208,8 +213,8 @@ public class DisplayController{
            }
            
            //Map and draw the line for new data point
-           inByte = map(inByte, 0, 700, 0, height);
-           
+           inByte = map(inByte, 0, 700, 0, 1100);
+           println(inByte);
            line.update(inByte);
 
         break;
@@ -249,7 +254,7 @@ public class DisplayController{
       case NONE:
         fill(0xff,180);
         strokeWeight(0);        
-        rect(displayWidth*0.07, displayHeight*0.135, displayWidth*0.86, displayHeight*0.79, 250);
+        rect(displayWidth*0.08, displayHeight*0.13, displayWidth*0.84, displayHeight*0.8, 250);
         strokeWeight(3);
         rect(displayWidth*0.0625, displayHeight*0.12, displayWidth*0.875, displayHeight*0.82, 250);
         
@@ -362,7 +367,7 @@ public class DisplayController{
         image(returnImg,RETURNX-16,RETURNY-20);
         
         break;
-      
+        
       //This is the ECG Demo screen. It has a line graph showing the ECG signal and has a Return button too
       case ECG_DEMO:
         strokeWeight(1);
@@ -379,18 +384,18 @@ public class DisplayController{
         
         textSize(32);
         fill(0, 102, 153, 51);
-        text(line.getNumBeats()*60/REPEAT_TIME + " BPM", 290, 270);  // Specify a z-axis value
+        text(line.getNumBeats()*60/REPEAT_TIME + " BPM", ECG_DISPLAYX+100, ECG_DISPLAYY-430);  // Specify a z-axis value
         
         fill(0xff,240);
-        rect( width/4 - 50,height*3/4, 1100, 200,30);
+        rect(ECG_LEARNABOUTX-900/2, ECG_LEARNABOUTY, 900, 220,30);
         fill(0);
         textSize(18);
         textAlign(CENTER,CENTER);
-        text("Place your hands on the bar with palms touching the front electrode and tips of the fingers touching the back electrode. Your ECG will be displayed on the graph above, to find an accurate Beats Per Minute (BPM), hold the bar for 20 seconds. A detection algorithm is used to identify when the beats occur, highlighted in blue. Try jogging on the spot to increase your heart rate and watch the difference.", width/4,height*3/4, 1000, 200);
+        text("Place your hands on the bar with palms touching the front electrode and tips of the fingers touching the back electrode. Your ECG will be displayed on the graph above, to find an accurate Beats Per Minute (BPM), hold the bar for 20 seconds. A detection algorithm is used to identify when the beats occur, highlighted in blue. Try jogging on the spot to increase your heart rate and watch the difference.", ECG_LEARNABOUTX-800/2, ECG_LEARNABOUTY, 800, 220);
         
         if(ECGOpen){
           textSize(38);
-          text("Place your hands on the bar to display your ECG",width/2,height/2);
+          text("Place your hands on the bar to display your ECG",width/2,height*3/5-200);
         }
         
         break;
@@ -441,7 +446,7 @@ public class DisplayController{
         break;
       case ECG_DEMO:
         bar = null;
-        line = new LineGraph(200,700,REPEAT_TIME*100,400,REPEAT_TIME*100,0, 1100,"ECG Data",true);
+        line = new LineGraph(ECG_DISPLAYX, ECG_DISPLAYY, REPEAT_TIME*100,400,REPEAT_TIME*100,0, 1100,"ECG Data",true);
         currentScreen = DisplayScreen.ECG_DEMO;
         
         if(!Debug){

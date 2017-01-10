@@ -153,7 +153,7 @@ public class FlappyRaven{
     
     public Bird(){
      x = (40)+flappyX;
-     y = (flappyY+yLen)/2;
+     y = flappyY+yLen/2;
     }
     
     public void update(){

@@ -8,7 +8,8 @@ Serial myPort;
 static final int TIMEOUT = 60*240; //How long the application should wait with no interaction before closing. 60 frames per second * 240 seconds (3 minutes)
 int timer; //counter for timeout
 
-final static boolean Debug = false; //Debug should be true when no arduino is attached
+final static boolean Debug = true; //Debug should be true when no arduino is attached
+final static boolean portraitMode = false;
 
 public void settings() {
   fullScreen();
@@ -66,75 +67,46 @@ public class DisplayController{
   //These store the locations of the buttons
   
   /* This is for Portrait Mode */
-  final int EMG_BUTTONX = displayWidth*70/100;
-  final int EMG_BUTTONY = displayHeight/2;
-  final int ECG_BUTTONX = displayWidth*30/100;
-  final int ECG_BUTTONY = displayHeight/2;
-  final int BUTTONSIZE_1 = 400;
-  final int BUTTONSIZE_2 = 100; //return button
-  final int BUTTONSIZE_3 = 70; //home button
+  int EMG_BUTTONX = displayWidth*70/100;
+  int EMG_BUTTONY = displayHeight/2;
+  int ECG_BUTTONX = displayWidth*30/100;
+  int ECG_BUTTONY = displayHeight/2;
+  int BUTTONSIZE_1 = 400;
+  int BUTTONSIZE_2 = 100; //return button
+  int BUTTONSIZE_3 = 70; //home button
   
-  final int LEARNX = displayWidth/2;
-  final int LEARNY = displayHeight/3;
-  final int LEARN_SIZEY = 800;
-  final int LEARN_SIZEX = 900;
+  int LEARNX = displayWidth/2;
+  int LEARNY = displayHeight/3;
+  int LEARN_SIZEY = 800;
+  int LEARN_SIZEX = 900;
   
   
-  final int EMG_DEMOX = displayWidth/2;
-  final int EMG_DEMOY = displayHeight*3/4;
-  final int ECG_DEMOX = displayWidth/2;
-  final int ECG_DEMOY = displayHeight*3/4;
-  final int RETURNX = displayWidth-100;
-  final int RETURNY = displayHeight-100;
-  final int HOMEX = displayWidth-100;
-  final int HOMEY = displayHeight-200;
+  int EMG_DEMOX = displayWidth/2;
+  int EMG_DEMOY = displayHeight*3/4;
+  int ECG_DEMOX = displayWidth/2;
+  int ECG_DEMOY = displayHeight*3/4;
+  int RETURNX = displayWidth-100;
+  int RETURNY = displayHeight-100;
+  int HOMEX = displayWidth-100;
+  int HOMEY = displayHeight-200;
   
-  final int FLAPPYX = (displayWidth - 1000)/2;
-  final int FLAPPYY = (displayHeight - 500)/2;
-  final int EMG_BARX = displayWidth/2;
-  final int EMG_BARY = displayHeight-40;
-  final int EMG_LINEX = displayWidth/2-400;
-  final int EMG_LINEY = displayHeight-40;
-  final int EMG_INFOX = displayWidth*5/100;
-  final int EMG_INFOY = displayHeight*1/10;
-  final int EMG_STEPSX = displayWidth*6/10;
-  final int EMG_STEPSY = displayHeight*1/10;
+  int FLAPPYX = (displayWidth - 1000)/2;
+  int FLAPPYY = (displayHeight - 500)/2;
+  int EMG_BARX = displayWidth/2;
+  int EMG_BARY = displayHeight-40;
+  int EMG_LINEX = displayWidth/2-400;
+  int EMG_LINEY = displayHeight-40;
+  int EMG_INFOX = displayWidth*5/100;
+  int EMG_INFOY = displayHeight*1/10;
+  int EMG_STEPSX = displayWidth*6/10;
+  int EMG_STEPSY = displayHeight*1/10;
   
-  final int ECG_DISPLAYX = (displayWidth-REPEAT_TIME*100)/2;
-  final int ECG_DISPLAYY = displayHeight*3/5;
-  final int ECG_LEARNABOUTX = displayWidth/2;
-  final int ECG_LEARNABOUTY = displayHeight*3/4;
+  int ECG_DISPLAYX = (displayWidth-REPEAT_TIME*100)/2;
+  int ECG_DISPLAYY = displayHeight*3/5;
+  int ECG_LEARNABOUTX = displayWidth/2;
+  int ECG_LEARNABOUTY = displayHeight*3/4;
   
-  /* This is for Landscape Mode - This will need to be updated if Landscape mode is desired */
-  //final int EMG_BUTTONX = displayWidth*3/4;
-  //final int EMG_BUTTONY = displayHeight/2;
-  //final int ECG_BUTTONX = displayWidth/4;
-  //final int ECG_BUTTONY = displayHeight/2;
-  //final int BUTTONSIZE_1 = 400;
-  //final int BUTTONSIZE_2 = 100; //return button
-  //final int BUTTONSIZE_3 = 70; //home button
   
-  //final int LEARNX = displayWidth/3;
-  //final int LEARNY = displayHeight/2;
-  //final int LEARN_SIZEY = 800;
-  //final int LEARN_SIZEX = 900;
-  //final int ECG_LEARNABOUTX = displayWidth/4;
-  //final int ECG_LEARNABOUTY = displayHeight/2;
-  //final int EMG_DEMOX = displayWidth*3/4;
-  //final int EMG_DEMOY = displayHeight/2;
-  //final int ECG_DEMOX = displayWidth*3/4;
-  //final int ECG_DEMOY = displayHeight/2;
-  //final int RETURNX = displayWidth-100;
-  //final int RETURNY = displayHeight-100;
-  //final int HOMEX = displayWidth-100;
-  //final int HOMEY = displayHeight-200;
-  
-  //final int FLAPPYX = 400;
-  //final int FLAPPYY = 100;
-  //final int EMG_BARX = width/2-100;
-  //final int EMG_BARY = height-40;
-  //final int EMG_LINEX = width/2-500;
-  //final int EMG_LINEY = height-40;
   
   static final int REPEAT_TIME = 10; //in seconds
   
@@ -158,8 +130,8 @@ public class DisplayController{
   boolean ECGOpen;
   
   public DisplayController(Serial port){
+    
     currentScreen = DisplayScreen.NONE;
-    bg = loadImage("Portrait.png");
     heartImg = loadImage("heart3.png");
     heartImg.resize(0,300);
     muscleImg = loadImage("muscle.png");
@@ -173,6 +145,56 @@ public class DisplayController{
     returnImg.resize(0,50);
     homeImg = loadImage("home.png");
     homeImg.resize(0,50);
+    
+    /* This is for Landscape Mode - This will need to be updated if Landscape mode is desired */
+    if(portraitMode == false){
+  
+      EMG_BUTTONX = displayWidth*3/4;
+      EMG_BUTTONY = displayHeight/2;
+      ECG_BUTTONX = displayWidth/4;
+      ECG_BUTTONY = displayHeight/2;
+      BUTTONSIZE_1 = 400;
+      BUTTONSIZE_2 = 100; //return button
+      BUTTONSIZE_3 = 70; //home button
+      
+      LEARNX = displayWidth/3;
+      LEARNY = displayHeight/2;
+      LEARN_SIZEY = 800;
+      LEARN_SIZEX = 900;
+      ECG_LEARNABOUTX = displayWidth/4;
+      ECG_LEARNABOUTY = displayHeight/2;
+      EMG_DEMOX = displayWidth*3/4;
+      EMG_DEMOY = displayHeight/2;
+      ECG_DEMOX = displayWidth*3/4;
+      ECG_DEMOY = displayHeight/2;
+      RETURNX = displayWidth-100;
+      RETURNY = displayHeight-100;
+      HOMEX = displayWidth-100;
+      HOMEY = displayHeight-200;
+      
+      FLAPPYX = 400;
+      FLAPPYY = 100;
+      EMG_BARX = width/2-100;
+      EMG_BARY = height-40;
+      EMG_LINEX = width/2-500;
+      EMG_LINEY = height-40;
+      EMG_INFOX = displayWidth*5/100;
+      EMG_INFOY = displayHeight*1/10;
+      EMG_STEPSX = displayWidth*6/10;
+      EMG_STEPSY = displayHeight*1/10;
+      
+      ECG_DISPLAYX = (displayWidth-REPEAT_TIME*100)/2;
+      ECG_DISPLAYY = displayHeight*3/5;
+      ECG_LEARNABOUTX = displayWidth/2;
+      ECG_LEARNABOUTY = displayHeight*3/4;
+      
+      bg = loadImage("MainBackground.png");
+    }else{
+      bg = loadImage("Portrait.png");
+    }
+      
+    
+
     
     String[] t = loadStrings("ECG.txt");
     for(int i = 0; i < t.length; i++){
@@ -214,7 +236,7 @@ public class DisplayController{
            
            //Map and draw the line for new data point
            inByte = map(inByte, 0, 700, 0, 1100);
-           println(inByte);
+           //println(inByte);
            line.update(inByte);
 
         break;

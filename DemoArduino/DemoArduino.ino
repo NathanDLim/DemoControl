@@ -1,6 +1,6 @@
 
 
-#include <Mouse.h>
+#include <Keyboard.h>
 #define ECG_PRINT_SPEED 10
 #define EMG_PRINT_SPEED 5
 #define ECG_SIG_PIN 0
@@ -190,7 +190,7 @@ void setup() {
   currMode = NONE;
 
   // initialize the serial communication
-  Mouse.begin();
+  Keyboard.begin();
   Serial.begin(9600);
 }
 
@@ -252,7 +252,7 @@ void loop()
       Serial.println(env);
 
       if (oldEnv < threshold && env > threshold)
-        Mouse.click();
+        Keyboard.write(0x20);
 
       //Wait for a bit to keep serial data from saturating
       delay(EMG_PRINT_SPEED);

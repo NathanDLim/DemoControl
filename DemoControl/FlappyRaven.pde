@@ -33,7 +33,7 @@ public class FlappyRaven{
     rect(flappyX-10,flappyY+yLen,xLen+20,10);
   }
   
-  void mouseClicked(){
+  void triggerEvent(){
     game.jump();
   }
   

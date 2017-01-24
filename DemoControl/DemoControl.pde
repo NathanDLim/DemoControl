@@ -8,8 +8,8 @@ Serial myPort;
 static final int TIMEOUT = 60*240; //How long the application should wait with no interaction before closing. 60 frames per second * 240 seconds (3 minutes)
 int timer; //counter for timeout
 
-final static boolean Debug = true; //Debug should be true when no arduino is attached
-final static boolean portraitMode = false;
+final static boolean Debug = false; //Debug should be true when no arduino is attached
+final static boolean portraitMode = false; //Portrait mode is set to false to launch in Lansdcape mode
 
 public void settings() {
   fullScreen();
@@ -46,8 +46,14 @@ void draw(){
 
 void mouseReleased(){
  timer= 0; //reset timer when mouse is clicked & released
- controller.buttonCheck(); 
+ controller.buttonCheck();
 }
+
+void keyPressed(){
+  if(key == 0x20)
+    controller.EMGTriggerEvent(); 
+}
+
 
 void mouseMoved(){
  timer = 0;  //reset timer when mouse is moved
@@ -172,16 +178,16 @@ public class DisplayController{
       HOMEX = displayWidth-100;
       HOMEY = displayHeight-200;
       
-      FLAPPYX = 400;
-      FLAPPYY = 100;
-      EMG_BARX = width/2-100;
-      EMG_BARY = height-40;
-      EMG_LINEX = width/2-500;
-      EMG_LINEY = height-40;
+      FLAPPYX = (displayWidth-1000)/2;
+      FLAPPYY = (displayHeight-900)/2;
+      EMG_BARX = displayWidth/2-100;
+      EMG_BARY = displayHeight-40;
+      EMG_LINEX = displayWidth/2-500;
+      EMG_LINEY = displayHeight-40;
       EMG_INFOX = displayWidth*5/100;
-      EMG_INFOY = displayHeight*1/10;
-      EMG_STEPSX = displayWidth*6/10;
-      EMG_STEPSY = displayHeight*1/10;
+      EMG_INFOY = displayHeight*7/10;
+      EMG_STEPSX = displayWidth*65/100;
+      EMG_STEPSY = displayHeight*6/10;
       
       ECG_DISPLAYX = (displayWidth-REPEAT_TIME*100)/2;
       ECG_DISPLAYY = displayHeight*3/5;
@@ -479,7 +485,10 @@ public class DisplayController{
      }
   }
    
-   
+   public void EMGTriggerEvent(){
+     if(currentScreen == DisplayScreen.EMG_DEMO)
+       emgGame.triggerEvent();
+   }
    
   /*
    * This function is called whenever the mouse is clicked. It specifies regions where the buttons will take effect. It calls the switchTo() function
@@ -503,9 +512,7 @@ public class DisplayController{
         }
         break;
       case EMG_DEMO:
-        if(emgGame.gameInProgress() == true){
-          emgGame.mouseClicked(); 
-        }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
+        if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
           switchTo(DisplayScreen.EMG);
         }else if((mouseX-HOMEX)*(mouseX-HOMEX) + (mouseY- HOMEY)*(mouseY- HOMEY) <= BUTTONSIZE_3/2*BUTTONSIZE_3/2){
           switchTo(DisplayScreen.NONE);
@@ -514,8 +521,6 @@ public class DisplayController{
           if(!Debug)
             myPort.write("THRSH:" + str(bar.getThreshold()));
           //println("THRSH:" + str(bar.getThreshold()));
-        }else if(mouseX > FLAPPYX && mouseX < FLAPPYX + 1000 && mouseY > FLAPPYY && mouseY < FLAPPYY + 500){
-          emgGame.mouseClicked(); 
         }
         break;
       case ECG:

@@ -8,8 +8,10 @@ Serial myPort;
 static final int TIMEOUT = 60*240; //How long the application should wait with no interaction before closing. 60 frames per second * 240 seconds (3 minutes)
 int timer; //counter for timeout
 
-final static boolean Debug = false; //Debug should be true when no arduino is attached
-final static boolean portraitMode = false; //Portrait mode is set to false to launch in Lansdcape mode
+final static boolean Debug = true; //Debug should be true when no arduino is attached
+final static boolean portraitMode = true; //Portrait mode is set to false to launch in Lansdcape mode
+
+final static float SCALING = 1.5;
 
 public void settings() {
   fullScreen();
@@ -77,9 +79,9 @@ public class DisplayController{
   int EMG_BUTTONY = displayHeight/2;
   int ECG_BUTTONX = displayWidth*30/100;
   int ECG_BUTTONY = displayHeight/2;
-  int BUTTONSIZE_1 = 400;
-  int BUTTONSIZE_2 = 100; //return button
-  int BUTTONSIZE_3 = 70; //home button
+  int BUTTONSIZE_1 = (int)(400*SCALING);
+  int BUTTONSIZE_2 = (int)(100*SCALING); //return button
+  int BUTTONSIZE_3 = (int)(70*SCALING); //home button
   
   int LEARNX = displayWidth/2;
   int LEARNY = displayHeight/3;
@@ -271,7 +273,8 @@ public class DisplayController{
    * The draw function draws depending on which screen is currently being displayed
    */
   public void draw(){
-    image(bg,0,0);
+    //image(bg,0,0);
+    background(0);
     textSize(38);
     textAlign(CENTER, CENTER);
     strokeWeight(3);
@@ -280,7 +283,10 @@ public class DisplayController{
 
       //This is the starting screen, two options, EMG or ECG
       case NONE:
+        //fill(0xff,200);
+        
         fill(0xff,180);
+        ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         strokeWeight(0);        
         rect(displayWidth*0.08, displayHeight*0.13, displayWidth*0.84, displayHeight*0.8, 250);
         strokeWeight(3);
@@ -291,6 +297,7 @@ public class DisplayController{
         text("Choose an option to Demo", displayWidth/2, displayHeight*0.19);
         
         fill(0xff,180);
+        
         textSize(28);
         image(heartImg,ECG_BUTTONX-200,height/2+70);
         image(muscleImg,EMG_BUTTONX-20,height/2);
@@ -298,10 +305,12 @@ public class DisplayController{
         ellipse(ECG_BUTTONX, height/2, BUTTONSIZE_1, BUTTONSIZE_1);
         ellipse(EMG_BUTTONX, height/2, BUTTONSIZE_1, BUTTONSIZE_1);
         
+        
         fill(0);
         
         text("Electromyography", EMG_BUTTONX,height/2);
         text("Electrocardiography", ECG_BUTTONX,height/2);
+        text("Exit", RETURNX, RETURNY);
         break;
         
       //This is the EMG screen. It displays information about what EMG is and has two buttons: EMG Demo and Return
@@ -458,8 +467,8 @@ public class DisplayController{
         
         break;
       case EMG_DEMO:
-        bar = new BarGraph(EMG_BARX,EMG_BARY, 200, 1000,350,"Amplified, Rectified, Integrated Signal");
-        line = new LineGraph(EMG_LINEX,EMG_LINEY,350,350,350,-150,150,"EMG Signal",false);
+        bar = new BarGraph(EMG_BARX,EMG_BARY, 200, 1000,int(350*SCALING),"Amplified, Rectified, Integrated Signal");
+        line = new LineGraph(EMG_LINEX,EMG_LINEY,int(350*SCALING),int(350*SCALING),350,-150,150,"EMG Signal",false);
         emgGame =  new FlappyRaven(FLAPPYX,FLAPPYY);
 
         currentScreen = DisplayScreen.EMG_DEMO;
@@ -500,6 +509,8 @@ public class DisplayController{
           switchTo(DisplayScreen.EMG);  
         }else if((mouseX-ECG_BUTTONX)*(mouseX-ECG_BUTTONX) + (mouseY- ECG_BUTTONY)*(mouseY-ECG_BUTTONY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
           switchTo(DisplayScreen.ECG);          
+        }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
+          exit();
         }
         break;
       case EMG:

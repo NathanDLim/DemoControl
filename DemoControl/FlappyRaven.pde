@@ -1,5 +1,8 @@
 import java.util.Random;
 
+/*
+ * The main class for a flappy raven game. 
+ */
 public class FlappyRaven{
   int bgGroundLevel = 60;
   PImage bg;
@@ -10,8 +13,8 @@ public class FlappyRaven{
   public FlappyRaven(int x, int y) {
     this.flappyX = x;
     this.flappyY = y;
-    xLen = 1000;
-    yLen = 500;
+    xLen = int(1000*SCALING);
+    yLen = int(500*SCALING);
     game = new Game();
     bg = loadImage("Background.png");
     bg.resize(xLen,yLen);
@@ -25,6 +28,7 @@ public class FlappyRaven{
     game.update();
     game.draw();
     
+    //Draw some borders for the game
     fill(0);
     noStroke();
     rect(flappyX-10,flappyY,10,yLen);
@@ -41,6 +45,9 @@ public class FlappyRaven{
       return !game.getGameOver();
     }
 
+  /*
+   * The model for the flappy bird game. It has a list of bars, and the bird.
+   */
   class Game{
     ArrayList<Bar> bars = new ArrayList<Bar>();
     Bird bird = new Bird();
@@ -59,30 +66,33 @@ public class FlappyRaven{
      showOpeningInfo = true;
     }
     
+    /*
+     * This function is called every cycle. It updates the bars and the bird, adding more bars whenever necessary
+     */
     public void update(){
       if(showOpeningInfo){
         td.update("Welcome to Flappy Raven!\nPlace your arm in the brace and squeeze to see the bar graph increase. Click the bar graph to set the threshold. When it passes the red line, the mouse will click. \n\nClick inside the game to start");
         td.setCenter(true);
       }else if(!gameOver){
       
-        if(millis() - time >= difficulty){
-          bars.add(makeBar(flappyX+xLen));
-          //System.out.println("here");
-          time = millis();
-        }
+        
+      if(bars.size() > 0 && bars.get(bars.size()-1).getX() < flappyX+xLen-300*SCALING+12*difficulty){
+        bars.add(makeBar(flappyX+xLen));
+      }
+        
         
         
         for(int i = 0; i < bars.size(); i++){
             bars.get(i).update();
             if(!bars.get(i).checkBounds()){
               bars.remove(i);
-              difficulty = difficulty < 3000? difficulty: difficulty-400;
+              difficulty = difficulty > 10? difficulty: difficulty+1;
               score++;
             }
             
         }
         
-        if(bars.get(0).collision(bird))
+        if(bars.size() > 0 && bars.get(0).collision(bird))
               gameOver();
         
         bird.update();
@@ -102,28 +112,33 @@ public class FlappyRaven{
     }
     
     private void startGame(){
-     difficulty = 5000;
+     difficulty = 1;
      bars.clear();
-     bars.add(makeBar(flappyX+xLen - 300));
+     bars.add(makeBar(flappyX+xLen - int(300*SCALING)));
      bars.add(makeBar(flappyX+xLen));
      bird = new Bird();
      score =0;
-     time = millis();
      gameOver = false;
      showOpeningInfo = false;
      td = new TextDisplay("Score: 0");
      td.setCenter(false);
     }
     
+    /*
+     * Makes a new bar at the x location. The size of the gap is a function of difficulty, the position of the gap is a random distribution
+     */
     private Bar makeBar(int x){
-      int size = difficulty/20;
+      int size = 300-difficulty*12;
       int pos = (int)r.nextInt(((yLen)-size-bgGroundLevel-5));
       
       if(pos<25) pos = 25;
-      if(pos > (yLen-size-65)) pos = yLen-size-bgGroundLevel-5;
+      if(pos > (yLen-size-65)) pos = yLen-size-bgGroundLevel-int(5*SCALING);
       return new Bar(x,size,pos);
     }
     
+    /*
+     * This function tells each of the components of the game to draw themselves.
+     */
     public void draw(){
       strokeWeight(1);
       for(int i = 0; i < bars.size(); i++){
@@ -133,10 +148,13 @@ public class FlappyRaven{
       td.draw();
     }
     
+    /*
+     * Some interaction was noted. Either jump, or restart the game
+     */
     public void jump(){
       if(!gameOver){
         bird.jump();
-      }else if(millis() - time > 1000){
+      }else if(millis() - time > 1000){ //Wait 1 second before stating the game again
         startGame();
       }
     }
@@ -146,25 +164,29 @@ public class FlappyRaven{
     }
   }
   
+  /*
+   * This is the bird class. It has an x, y, and instantaneous acceleration.
+   */
   class Bird{
     int x;
     int y;
     float accel;
     
     public Bird(){
-     x = (40)+flappyX;
+     x = int(80*SCALING)+flappyX;
      y = flappyY+yLen/2;
     }
     
+    // This increases acceleration towards the ground up to a maximum
     public void update(){
       y += accel;
       if(y < flappyY+20)
         y = flappyY+20;
-      accel = accel > 3? accel: accel + 0.05;
+      accel = accel > 3? accel: accel + 0.05*SCALING;
     }
     
     public void jump(){
-       accel = -1.5;
+       accel = -1.5*SCALING;
     }
     
     public int getY(){
@@ -184,14 +206,13 @@ public class FlappyRaven{
       rotate(accel/2-0.3);
       
       fill(0);
-      ellipse(0,0,35,30); //body
+      ellipse(0,0,35*SCALING,30*SCALING); //body
       fill(108);
-      ellipse(15,0,20,8); //beak
+      ellipse(15*SCALING,0,20*SCALING,8*SCALING); //beak
       
       
-      ellipse(12,-10,5,5); //pupil
       fill(40);
-      ellipse(-12,0,25,accel*8 -4); //wing. using the current accel makes it look like it is flapping
+      ellipse(-12,0,25*SCALING,(accel*8 -4)*SCALING); //wing. using the current accel makes it look like it is flapping
       popMatrix();
       
       
@@ -199,16 +220,19 @@ public class FlappyRaven{
       translate(x,y);
       rotate(accel/2-0.8);
       fill(0xff);
-      ellipse(16,-2,9,12); //eye
+      ellipse(16*SCALING,-2,9*SCALING,12*SCALING); //eye
       
       fill(0);
-      ellipse(17,0,3,3); //pupil
+      ellipse(17*SCALING,0,3*SCALING,3*SCALING); //pupil
       popMatrix();
       
       
     }
   }
   
+  /*
+   * The bar class has a bar width, x position, size of break, and the position of the break.
+   */
   class Bar{
     int barWidth;
     int x;
@@ -219,8 +243,12 @@ public class FlappyRaven{
       this.x = x;
       this.breakSize = size;
       this.breakPosition = pos;
-      barWidth = 40;
+      barWidth = int(40*SCALING);
     }
+    
+    public int getX(){
+      return x;
+    }  
     
     
     public void draw(){
@@ -242,17 +270,19 @@ public class FlappyRaven{
       //Top tube
       rect(start,flappyY,size,breakPosition);
       //bottom tube
-      rect(start,flappyY+breakPosition+breakSize,size, yLen - (breakPosition+breakSize) - 40); 
+      rect(start,flappyY+breakPosition+breakSize,size, yLen - (breakPosition+breakSize) - 40*SCALING); 
       
       //tube openings
-      rect(start-6,flappyY+breakPosition-20,size + 12,20);
-      rect(start-6,flappyY+breakPosition+breakSize,size + 12,20); 
+      rect(start-10,flappyY+breakPosition-20,(size + 20),20*SCALING);
+      rect(start-10,flappyY+breakPosition+breakSize,(size + 20),20*SCALING); 
     }
     
+    //This function changes the x position of the bar, moving them leftwards 
     public void update(){
-      x--;
+      x = x- int(1.5*SCALING);
     }
     
+    // This checks if the bar has left the screen
     public boolean checkBounds(){
      if(x < flappyX-barWidth)
        return false;
@@ -292,7 +322,7 @@ public class FlappyRaven{
       
       if(!centerText){
         fill(0xff,160);
-        ellipse(x,y,(size-5)*text.length()+4,40);
+        ellipse(x,y,((size-5)*text.length()+4)*SCALING,40*SCALING);
         fill(0);
         text(text,x,y-2);
       }else{

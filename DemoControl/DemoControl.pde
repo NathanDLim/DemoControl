@@ -11,7 +11,7 @@ int timer; //counter for timeout
 final static boolean Debug = true; //Debug should be true when no arduino is attached
 final static boolean portraitMode = true; //Portrait mode is set to false to launch in Lansdcape mode
 
-final static float SCALING = 1.5;
+final static float SCALING = 2;
 
 public void settings() {
   fullScreen();
@@ -85,32 +85,32 @@ public class DisplayController{
   
   int LEARNX = displayWidth/2;
   int LEARNY = displayHeight/3;
-  int LEARN_SIZEY = 800;
-  int LEARN_SIZEX = 900;
+  int LEARN_SIZEY = int(800*SCALING);
+  int LEARN_SIZEX = int(900*SCALING);
   
   
   int EMG_DEMOX = displayWidth/2;
   int EMG_DEMOY = displayHeight*3/4;
   int ECG_DEMOX = displayWidth/2;
   int ECG_DEMOY = displayHeight*3/4;
-  int RETURNX = displayWidth-100;
-  int RETURNY = displayHeight-100;
-  int HOMEX = displayWidth-100;
-  int HOMEY = displayHeight-200;
+  int RETURNX = displayWidth-int(80*SCALING);
+  int RETURNY = displayHeight*3/4-100;
+  int HOMEX = displayWidth-int(80*SCALING);
+  int HOMEY = displayHeight*3/4-int(150*SCALING);
   
-  int FLAPPYX = (displayWidth - 1000)/2;
-  int FLAPPYY = (displayHeight - 500)/2;
+  int FLAPPYX = int(displayWidth - 1000*SCALING)/2;
+  int FLAPPYY = int(displayHeight - 500*SCALING)*2/5;
   int EMG_BARX = displayWidth/2;
-  int EMG_BARY = displayHeight-40;
-  int EMG_LINEX = displayWidth/2-400;
-  int EMG_LINEY = displayHeight-40;
+  int EMG_BARY = displayHeight*4/5-40;
+  int EMG_LINEX = displayWidth/2-int(400*SCALING);
+  int EMG_LINEY = displayHeight*4/5-40;
   int EMG_INFOX = displayWidth*5/100;
   int EMG_INFOY = displayHeight*1/10;
   int EMG_STEPSX = displayWidth*6/10;
   int EMG_STEPSY = displayHeight*1/10;
   
-  int ECG_DISPLAYX = (displayWidth-REPEAT_TIME*100)/2;
-  int ECG_DISPLAYY = displayHeight*3/5;
+  int ECG_DISPLAYX = int(displayWidth-REPEAT_TIME*100*SCALING)/2;
+  int ECG_DISPLAYY = int(displayHeight+400*SCALING)*2/5;
   int ECG_LEARNABOUTX = displayWidth/2;
   int ECG_LEARNABOUTY = displayHeight*3/4;
   
@@ -141,18 +141,19 @@ public class DisplayController{
     
     currentScreen = DisplayScreen.NONE;
     heartImg = loadImage("heart3.png");
-    heartImg.resize(0,300);
+    heartImg.resize(0,int(300*SCALING));
     muscleImg = loadImage("muscle.png");
-    muscleImg.resize(0,400);
+    muscleImg.resize(0,int(400*SCALING));
     lightbulbImg = loadImage("lightbulb.png");
-    lightbulbImg.resize(0,100);
+    lightbulbImg.resize(0,int(100*SCALING));
     emgSigImg = loadImage("emgSignal.png");
+    emgSigImg.resize(0,int(150*SCALING));
     ecgSigImg = loadImage("ecgSignal.png");
-    ecgSigImg.resize(0,150);
+    ecgSigImg.resize(0,int(150*SCALING));
     returnImg = loadImage("return.png");
-    returnImg.resize(0,50);
+    returnImg.resize(0,int(50*SCALING));
     homeImg = loadImage("home.png");
-    homeImg.resize(0,50);
+    homeImg.resize(0,int(50*SCALING));
     
     /* This is for Landscape Mode - This will need to be updated if Landscape mode is desired */
     if(portraitMode == false){
@@ -286,21 +287,22 @@ public class DisplayController{
         //fill(0xff,200);
         
         fill(0xff,180);
-        ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
+        if(!portraitMode)
+          ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         strokeWeight(0);        
         rect(displayWidth*0.08, displayHeight*0.13, displayWidth*0.84, displayHeight*0.8, 250);
         strokeWeight(3);
         rect(displayWidth*0.0625, displayHeight*0.12, displayWidth*0.875, displayHeight*0.82, 250);
         
-        textSize(38);
+        textSize(45);
         fill(0);
         text("Choose an option to Demo", displayWidth/2, displayHeight*0.19);
         
         fill(0xff,180);
         
-        textSize(28);
-        image(heartImg,ECG_BUTTONX-200,height/2+70);
-        image(muscleImg,EMG_BUTTONX-20,height/2);
+        textSize(32);
+        image(heartImg,ECG_BUTTONX-200-70*SCALING,height*3/5+50*SCALING);
+        image(muscleImg,EMG_BUTTONX-20-70*SCALING,height*3/5);
         
         ellipse(ECG_BUTTONX, height/2, BUTTONSIZE_1, BUTTONSIZE_1);
         ellipse(EMG_BUTTONX, height/2, BUTTONSIZE_1, BUTTONSIZE_1);
@@ -310,7 +312,8 @@ public class DisplayController{
         
         text("Electromyography", EMG_BUTTONX,height/2);
         text("Electrocardiography", ECG_BUTTONX,height/2);
-        text("Exit", RETURNX, RETURNY);
+        if(!portraitMode)
+          text("Exit", RETURNX, RETURNY);
         break;
         
       //This is the EMG screen. It displays information about what EMG is and has two buttons: EMG Demo and Return
@@ -327,22 +330,22 @@ public class DisplayController{
         rect(LEARNX - LEARN_SIZEX/2,LEARNY - LEARN_SIZEY/2, LEARN_SIZEX, LEARN_SIZEY,40);
         fill(0);
         
-        textSize(28);
+        textSize(40);
         text("What is Electromyography?",LEARNX,LEARNY - LEARN_SIZEY*3/8);
         
-        textSize(18);
-        text(EMGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
-        image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
-        image(emgSigImg,LEARNX-LEARN_SIZEX/2+200,LEARNY+180);
-        
-        textSize(10);
-        text("(R. Merletti and P. Parker, Electromyography. [2004])", LEARNX - LEARN_SIZEX*3/8+530,LEARNY+155);
-        text("Konrad, P. The ABC of EMG. Noraxon Inc. [2006]", LEARNX - LEARN_SIZEX*3/8+420,LEARNY+380);
-        
         textSize(28);
+        text(EMGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
+        image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20*SCALING,LEARNY-LEARN_SIZEY/2+20*SCALING);
+        image(emgSigImg,LEARNX-LEARN_SIZEX/2+280*SCALING,LEARNY+180*SCALING);
+        
+        textSize(18);
+        text("(R. Merletti and P. Parker, Electromyography. [2004])", LEARNX - LEARN_SIZEX*3/8+550*SCALING,LEARNY+120*SCALING);
+        text("Konrad, P. The ABC of EMG. Noraxon Inc. [2006]", LEARNX - LEARN_SIZEX*3/8+350*SCALING,LEARNY+380*SCALING);
+        
+        textSize(32);
         text("EMG Demo", EMG_DEMOX,EMG_DEMOY);
         
-        image(returnImg,RETURNX-16,RETURNY-20);
+        image(returnImg,RETURNX-16*SCALING,RETURNY-20*SCALING);
         
         
         break;
@@ -360,19 +363,20 @@ public class DisplayController{
         stroke(0);
         strokeWeight(3);
         rect(EMG_STEPSX,EMG_STEPSY,400,400,40);
-        rect(EMG_INFOX,EMG_INFOY,320,200,40);
+        rect(EMG_INFOX,EMG_INFOY,420,250,40);
+        
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         ellipse(HOMEX, HOMEY, BUTTONSIZE_3, BUTTONSIZE_3);
         
         fill(0);
-        textSize(18);
+        textSize(25);
         text("Step 1: Place your arm inside the Y Brace\n\nStep 2: Clench fist and watch Mean Absolute Value increase\n\nStep 3: Click on the Mean Absolute Value graph to set the desired threshold. When the bar rises above the threshold, a mouse click is generated\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",EMG_STEPSX + 15,EMG_STEPSY,380,400);
         textAlign(CENTER, CENTER);
-        textSize(22);
-        text("If you squeeze harder the amplitude will rise!",EMG_INFOX + 15,EMG_INFOY,290,200);
+        textSize(40);
+        text("If you squeeze harder the amplitude will rise!",EMG_INFOX + 15,EMG_INFOY,390,240);
        
-        image(returnImg,RETURNX-16,RETURNY-20);
-        image(homeImg,HOMEX-23,HOMEY-26);
+        image(returnImg,RETURNX-16*SCALING,RETURNY-20*SCALING);
+        image(homeImg,HOMEX-23*SCALING,HOMEY-26*SCALING);
         break;
         
       //This is the ECG screen. It displays information about what ECG is and has two buttons: ECG Demo and Return
@@ -386,22 +390,22 @@ public class DisplayController{
         //fill(0xff);
         rect(LEARNX - LEARN_SIZEX/2,LEARNY - LEARN_SIZEY/2, LEARN_SIZEX, LEARN_SIZEY,40);
         fill(0);
-        textSize(28);
+        textSize(40);
         text("What is Electrocardiography?",LEARNX,LEARNY - LEARN_SIZEY*3/8);
         
-        textSize(18);
+        textSize(28);
         text(ECGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
-        image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20,LEARNY-LEARN_SIZEY/2+20);
-        image(ecgSigImg,LEARNX - LEARN_SIZEX*3/8+230,LEARNY+220);
+        image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20*SCALING,LEARNY-LEARN_SIZEY/2+20*SCALING);
+        image(ecgSigImg,LEARNX - LEARN_SIZEX*3/8+220*SCALING,LEARNY+180*SCALING);
         
-        textSize(10);
-        text("(American Heart Association [2015])", LEARNX - LEARN_SIZEX*3/8+550,LEARNY+200);
-        text("ekg.academy [2014]", LEARNX - LEARN_SIZEX*3/8+320,LEARNY+380);
+        textSize(18);
+        text("(American Heart Association [2015])", LEARNX - LEARN_SIZEX*3/8+550*SCALING,LEARNY+150*SCALING);
+        text("ekg.academy [2014]", LEARNX - LEARN_SIZEX*3/8+320*SCALING,LEARNY+350*SCALING);
         
         textSize(28);
         text("ECG Demo", ECG_DEMOX, ECG_DEMOY);
         textSize(20);
-        image(returnImg,RETURNX-16,RETURNY-20);
+        image(returnImg,RETURNX-16*SCALING,RETURNY-20*SCALING);
         
         break;
         
@@ -415,8 +419,8 @@ public class DisplayController{
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         ellipse(HOMEX, HOMEY, BUTTONSIZE_3, BUTTONSIZE_3);
         fill(0);
-        image(returnImg,RETURNX-16,RETURNY-20);
-        image(homeImg,HOMEX-23,HOMEY-26);
+        image(returnImg,RETURNX-16*SCALING,RETURNY-20*SCALING);
+        image(homeImg,HOMEX-23*SCALING,HOMEY-26*SCALING);
         stroke(0);
         
         textSize(32);
@@ -483,7 +487,7 @@ public class DisplayController{
         break;
       case ECG_DEMO:
         bar = null;
-        line = new LineGraph(ECG_DISPLAYX, ECG_DISPLAYY, REPEAT_TIME*100,400,REPEAT_TIME*100,0, 1100,"ECG Data",true);
+        line = new LineGraph(ECG_DISPLAYX, ECG_DISPLAYY, int(REPEAT_TIME*100*SCALING),int(400*SCALING),REPEAT_TIME*100,0, 1100,"ECG Data",true);
         currentScreen = DisplayScreen.ECG_DEMO;
         
         if(!Debug){
@@ -509,8 +513,10 @@ public class DisplayController{
           switchTo(DisplayScreen.EMG);  
         }else if((mouseX-ECG_BUTTONX)*(mouseX-ECG_BUTTONX) + (mouseY- ECG_BUTTONY)*(mouseY-ECG_BUTTONY) <= BUTTONSIZE_1/2*BUTTONSIZE_1/2){
           switchTo(DisplayScreen.ECG);          
-        }else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
-          exit();
+        }
+        else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
+          if(!portraitMode)
+            exit();
         }
         break;
       case EMG:

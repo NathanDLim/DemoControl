@@ -182,11 +182,11 @@ public class FlappyRaven{
       y += accel;
       if(y < flappyY+20)
         y = flappyY+20;
-      accel = accel > 3? accel: accel + 0.05*SCALING;
+      accel = accel > 3*SCALING? accel: accel + 0.07*SCALING;
     }
     
     public void jump(){
-       accel = -1.5*SCALING;
+       accel = -1.8*SCALING;
     }
     
     public int getY(){
@@ -203,7 +203,7 @@ public class FlappyRaven{
   
       
       translate(x,y);
-      rotate(accel/2-0.3);
+      rotate(accel/3.5-0.3);
       
       fill(0);
       ellipse(0,0,35*SCALING,30*SCALING); //body
@@ -212,13 +212,13 @@ public class FlappyRaven{
       
       
       fill(40);
-      ellipse(-12,0,25*SCALING,(accel*8 -4)*SCALING); //wing. using the current accel makes it look like it is flapping
+      ellipse(-12,0,25*SCALING,(accel*8/3 -4)*SCALING); //wing. using the current accel makes it look like it is flapping
       popMatrix();
       
       
       pushMatrix();
       translate(x,y);
-      rotate(accel/2-0.8);
+      rotate(accel/3.5-0.8);
       fill(0xff);
       ellipse(16*SCALING,-2,9*SCALING,12*SCALING); //eye
       
@@ -322,15 +322,15 @@ public class FlappyRaven{
       
       if(!centerText){
         fill(0xff,160);
-        ellipse(x,y,((size-5)*text.length()+4)*SCALING,40*SCALING);
+        ellipse(x,y,((size-5)*text.length()+8),45);
         fill(0);
         text(text,x,y-2);
       }else{
         fill(0xff,160);
-        ellipse(x,y,800,400);
+        ellipse(x,y,800*SCALING,400*SCALING);
         fill(0);
         
-        text(text,x-230,y-260, xLen-500, 500);
+        text(text,x-230*SCALING,y-260, xLen-500*SCALING, 500);
       }
     }
     

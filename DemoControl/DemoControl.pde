@@ -11,7 +11,7 @@ int timer; //counter for timeout
 final static boolean Debug = true; //Debug should be true when no arduino is attached
 final static boolean portraitMode = true; //Portrait mode is set to false to launch in Lansdcape mode
 
-final static float SCALING = 2;
+final static float SCALING = 2; //scaling should be '1', when in landscape, '2' when in portrait for the big sreen.
 
 public void settings() {
   fullScreen();
@@ -128,6 +128,7 @@ public class DisplayController{
          ecgSigImg,
          returnImg,
          homeImg,
+         logo,
          bg; //display the images for the current screen
   
   Serial myPort;        // The serial port
@@ -154,6 +155,10 @@ public class DisplayController{
     returnImg.resize(0,int(50*SCALING));
     homeImg = loadImage("home.png");
     homeImg.resize(0,int(50*SCALING));
+    bg = loadImage("largeBG.jpg");
+    bg.resize(displayWidth,displayHeight);
+    logo = loadImage("75thLogo.jpg");
+    logo.resize(0,int(75*SCALING));
     
     /* This is for Landscape Mode - This will need to be updated if Landscape mode is desired */
     if(portraitMode == false){
@@ -197,9 +202,7 @@ public class DisplayController{
       ECG_LEARNABOUTX = displayWidth/2;
       ECG_LEARNABOUTY = displayHeight*3/4;
       
-      bg = loadImage("MainBackground.png");
-    }else{
-      bg = loadImage("Portrait.png");
+      
     }
       
     
@@ -274,8 +277,11 @@ public class DisplayController{
    * The draw function draws depending on which screen is currently being displayed
    */
   public void draw(){
-    //image(bg,0,0);
-    background(0);
+    image(bg,0,0);
+    //background(0);
+    
+    image(logo,displayWidth - 1.5*75*SCALING, 75*SCALING/2);
+    
     textSize(38);
     textAlign(CENTER, CENTER);
     strokeWeight(3);
@@ -370,7 +376,7 @@ public class DisplayController{
         
         fill(0);
         textSize(25);
-        text("Step 1: Place your arm inside the Y Brace\n\nStep 2: Clench fist and watch Mean Absolute Value increase\n\nStep 3: Click on the Mean Absolute Value graph to set the desired threshold. When the bar rises above the threshold, a mouse click is generated\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",EMG_STEPSX + 15,EMG_STEPSY,380,400);
+        text("Step 1: Place the clamp on your forearm.\n\nStep 2: Clench fist and watch Mean Absolute Value increase. If there is no response, try adjusting the clamp\n\nStep 3: Click on the Mean Absolute Value graph to set the desired threshold. When the bar rises above the threshold, a mouse click is generated\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",EMG_STEPSX + 15,EMG_STEPSY,380,400);
         textAlign(CENTER, CENTER);
         textSize(40);
         text("If you squeeze harder the amplitude will rise!",EMG_INFOX + 15,EMG_INFOY,390,240);

@@ -8,10 +8,10 @@ Serial myPort;
 static final int TIMEOUT = 60*240; //How long the application should wait with no interaction before closing. 60 frames per second * 240 seconds (3 minutes)
 int timer; //counter for timeout
 
-final static boolean Debug = true; //Debug should be true when no arduino is attached
-final static boolean portraitMode = true; //Portrait mode is set to false to launch in Lansdcape mode
+final static boolean Debug = false; //Debug should be true when no arduino is attached
+final static boolean portraitMode = false; //Portrait mode is set to false to launch in Lansdcape mode
 
-final static float SCALING = 2; //scaling should be '1', when in landscape, '2' when in portrait for the big sreen.
+final static float SCALING = 1; //scaling should be '1', when in landscape, '2' when in portrait for the big sreen.
 
 public void settings() {
   fullScreen();
@@ -192,8 +192,8 @@ public class DisplayController{
       EMG_BARY = displayHeight-40;
       EMG_LINEX = displayWidth/2-500;
       EMG_LINEY = displayHeight-40;
-      EMG_INFOX = displayWidth*5/100;
-      EMG_INFOY = displayHeight*7/10;
+      EMG_INFOX = displayWidth*1/100;
+      EMG_INFOY = displayHeight*2/10;
       EMG_STEPSX = displayWidth*65/100;
       EMG_STEPSY = displayHeight*6/10;
       
@@ -336,16 +336,35 @@ public class DisplayController{
         rect(LEARNX - LEARN_SIZEX/2,LEARNY - LEARN_SIZEY/2, LEARN_SIZEX, LEARN_SIZEY,40);
         fill(0);
         
-        textSize(40);
+        if(portraitMode)
+          textSize(40);
+        else
+          textSize(30);
         text("What is Electromyography?",LEARNX,LEARNY - LEARN_SIZEY*3/8);
         
-        textSize(28);
+        if(portraitMode)
+          textSize(28);
+        else
+          textSize(20);
+          
         text(EMGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
         image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20*SCALING,LEARNY-LEARN_SIZEY/2+20*SCALING);
-        image(emgSigImg,LEARNX-LEARN_SIZEX/2+280*SCALING,LEARNY+180*SCALING);
         
-        textSize(18);
-        text("(R. Merletti and P. Parker, Electromyography. [2004])", LEARNX - LEARN_SIZEX*3/8+550*SCALING,LEARNY+120*SCALING);
+        if(portraitMode)
+          image(emgSigImg,LEARNX-LEARN_SIZEX/2+280*SCALING,LEARNY+180*SCALING);
+        else
+          image(emgSigImg,LEARNX-LEARN_SIZEX/2+280*SCALING,LEARNY+220*SCALING);
+        
+        if(portraitMode)
+          textSize(18);
+        else
+          textSize(13);
+        
+        if(portraitMode)
+          text("(R. Merletti and P. Parker, Electromyography. [2004])", LEARNX - LEARN_SIZEX*3/8+550*SCALING,LEARNY+120*SCALING);
+        else
+          text("(R. Merletti and P. Parker, Electromyography. [2004])", LEARNX - LEARN_SIZEX*3/8+550*SCALING,LEARNY+220*SCALING);
+          
         text("Konrad, P. The ABC of EMG. Noraxon Inc. [2006]", LEARNX - LEARN_SIZEX*3/8+350*SCALING,LEARNY+380*SCALING);
         
         textSize(32);
@@ -375,10 +394,20 @@ public class DisplayController{
         ellipse(HOMEX, HOMEY, BUTTONSIZE_3, BUTTONSIZE_3);
         
         fill(0);
-        textSize(25);
-        text("Step 1: Place the clamp on your forearm.\n\nStep 2: Clench fist and watch Mean Absolute Value increase. If there is no response, try adjusting the clamp\n\nStep 3: Click on the Mean Absolute Value graph to set the desired threshold. When the bar rises above the threshold, a mouse click is generated\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",EMG_STEPSX + 15,EMG_STEPSY,380,400);
+        
+        if(portraitMode)
+          textSize(25);
+        else
+          textSize(20);
+          
+        text("Step 1: Place the clamp on your forearm.\n\nStep 2: Clench fist and watch the amplitude increase. If there is no response, try adjusting the clamp/rotating fist\n\nStep 3: Click on the bar graph to set the desired threshold. When the bar rises above the threshold, the bird will jump\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",EMG_STEPSX + 15,EMG_STEPSY,380,400);
         textAlign(CENTER, CENTER);
-        textSize(40);
+        
+        if(portraitMode)
+          textSize(40);
+        else
+          textSize(33);
+          
         text("If you squeeze harder the amplitude will rise!",EMG_INFOX + 15,EMG_INFOY,390,240);
        
         image(returnImg,RETURNX-16*SCALING,RETURNY-20*SCALING);
@@ -396,19 +425,37 @@ public class DisplayController{
         //fill(0xff);
         rect(LEARNX - LEARN_SIZEX/2,LEARNY - LEARN_SIZEY/2, LEARN_SIZEX, LEARN_SIZEY,40);
         fill(0);
-        textSize(40);
+        
+        if(portraitMode)
+          textSize(40);
+        else
+          textSize(30);
         text("What is Electrocardiography?",LEARNX,LEARNY - LEARN_SIZEY*3/8);
         
-        textSize(28);
+        if(portraitMode)
+          textSize(28);
+        else
+          textSize(18);
+          
         text(ECGInfo,LEARNX - LEARN_SIZEX*3/8,LEARNY - LEARN_SIZEY*3/8, LEARN_SIZEX*0.75,LEARN_SIZEY*0.75);
         image(lightbulbImg,LEARNX-LEARN_SIZEX/2+20*SCALING,LEARNY-LEARN_SIZEY/2+20*SCALING);
-        image(ecgSigImg,LEARNX - LEARN_SIZEX*3/8+220*SCALING,LEARNY+180*SCALING);
         
-        textSize(18);
-        text("(American Heart Association [2015])", LEARNX - LEARN_SIZEX*3/8+550*SCALING,LEARNY+150*SCALING);
-        text("ekg.academy [2014]", LEARNX - LEARN_SIZEX*3/8+320*SCALING,LEARNY+350*SCALING);
+        if(portraitMode)
+          image(ecgSigImg,LEARNX - LEARN_SIZEX*3/8+220*SCALING,LEARNY+180*SCALING);
+        else
+          image(ecgSigImg,LEARNX - LEARN_SIZEX*3/8+220*SCALING,LEARNY+220*SCALING);
         
-        textSize(28);
+        if(portraitMode){
+          textSize(18);
+          text("(American Heart Association [2015])", LEARNX - LEARN_SIZEX*3/8+550*SCALING,LEARNY+150*SCALING);
+          text("ekg.academy [2014]", LEARNX - LEARN_SIZEX*3/8+320*SCALING,LEARNY+350*SCALING);
+        }else{
+          textSize(13);
+          text("(American Heart Association [2015])", LEARNX - LEARN_SIZEX*3/8+550*SCALING,LEARNY+230*SCALING);
+          text("ekg.academy [2014]", LEARNX - LEARN_SIZEX*3/8+320*SCALING,LEARNY+380*SCALING);
+        }
+        
+        textSize(32);
         text("ECG Demo", ECG_DEMOX, ECG_DEMOY);
         textSize(20);
         image(returnImg,RETURNX-16*SCALING,RETURNY-20*SCALING);
@@ -478,7 +525,7 @@ public class DisplayController{
         break;
       case EMG_DEMO:
         bar = new BarGraph(EMG_BARX,EMG_BARY, 200, 1000,int(350*SCALING),"Amplified, Rectified, Integrated Signal");
-        line = new LineGraph(EMG_LINEX,EMG_LINEY,int(350*SCALING),int(350*SCALING),350,-150,150,"EMG Signal",false);
+        line = new LineGraph(EMG_LINEX,EMG_LINEY,int(350*SCALING),int(350*SCALING),350,-75,75,"EMG Signal",false);
         emgGame =  new FlappyRaven(FLAPPYX,FLAPPYY);
 
         currentScreen = DisplayScreen.EMG_DEMO;

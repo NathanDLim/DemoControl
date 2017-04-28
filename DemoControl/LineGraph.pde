@@ -161,10 +161,10 @@ class LineGraph{
     
     //draw a box around where the algorithm thinks the heart beats are
     noStroke();
-    fill(0, 102, 153, 50);
+    fill(0, 102, 153, 30);
     for(int i = 0; i < beatLoc.length;i++){
       if(beatLoc[i]==0) continue;
-      rect(x+beatLoc[i]-8,y,16,-yLength+100);
+      rect(x+int((beatLoc[i]-8)*SCALING),y,16*SCALING,-yLength+100);
     }
 
     //can either show the raw signal or the processed signal for detecting the QRS curve

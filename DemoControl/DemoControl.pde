@@ -12,7 +12,7 @@ static final int FIRST_CONTACT_TIMEOUT = 60*5; //How long the application should
 
 boolean firstContact;
 
-final static boolean Debug = true; //Debug should be true when no arduino is attached
+final static boolean Debug = false; //Debug should be true when no arduino is attached
 final static boolean portraitMode = false; //Portrait mode is set to false to launch in Lansdcape mode
 final static float SCALING = 1; //scaling should be '1', when in landscape, '2' when in portrait for the big sreen.
 
@@ -416,7 +416,12 @@ public class DisplayController{
         textAlign(LEFT, CENTER);
         stroke(0);
         strokeWeight(3);
-        rect(EMG_STEPSX,EMG_STEPSY,400,400,40);
+        
+        if(portraitMode)
+          rect(EMG_STEPSX,EMG_STEPSY,500,600,40);
+        else
+          rect(EMG_STEPSX,EMG_STEPSY,400,400,40);
+          
         rect(EMG_INFOX,EMG_INFOY,420,250,40);
         
         ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
@@ -424,12 +429,16 @@ public class DisplayController{
         
         fill(0);
         
-        if(portraitMode)
+        if(portraitMode){
           textSize(25);
-        else
+          text("Step 1: Place the clamp on your forearm.\n\nStep 2: Clench fist and watch the amplitude increase. If there is no response, try adjusting the clamp/rotating fist\n\nStep 3: Click on the bar graph to set the desired threshold. When the bar rises above the threshold, the bird will jump\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",EMG_STEPSX + 15,EMG_STEPSY,480,600);
+        }
+        else{
           textSize(20);
+          text("Step 1: Place the clamp on your forearm.\n\nStep 2: Clench fist and watch the amplitude increase. If there is no response, try adjusting the clamp/rotating fist\n\nStep 3: Click on the bar graph to set the desired threshold. When the bar rises above the threshold, the bird will jump\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",EMG_STEPSX + 15,EMG_STEPSY,380,400);
+        }
           
-        text("Step 1: Place the clamp on your forearm.\n\nStep 2: Clench fist and watch the amplitude increase. If there is no response, try adjusting the clamp/rotating fist\n\nStep 3: Click on the bar graph to set the desired threshold. When the bar rises above the threshold, the bird will jump\n\nStep 4: Move mouse to Flappy Raven screen and clench fist to begin",EMG_STEPSX + 15,EMG_STEPSY,380,400);
+        
         textAlign(CENTER, CENTER);
         
         if(portraitMode)
@@ -510,11 +519,25 @@ public class DisplayController{
         text(line.getNumBeats()*60/REPEAT_TIME + " BPM", ECG_DISPLAYX+100, ECG_DISPLAYY-430);  // Specify a z-axis value
         
         fill(0xff,240);
-        rect(ECG_LEARNABOUTX-900/2, ECG_LEARNABOUTY, 900, 220,30);
+        
+        if(portraitMode)
+          rect(ECG_LEARNABOUTX-900/2, ECG_LEARNABOUTY, 1000, 280,30);
+        else
+          rect(ECG_LEARNABOUTX-900/2, ECG_LEARNABOUTY, 900, 220,30);
+        
         fill(0);
-        textSize(18);
+        
         textAlign(CENTER,CENTER);
-        text("Place your hands on the bar with palms touching the front electrode and tips of the fingers touching the back electrode. Your ECG will be displayed on the graph above, to find an accurate Beats Per Minute (BPM), hold the bar for 20 seconds. A detection algorithm is used to identify when the beats occur, highlighted in blue. Try jogging on the spot to increase your heart rate and watch the difference.", ECG_LEARNABOUTX-800/2, ECG_LEARNABOUTY, 800, 220);
+        if(portraitMode){
+          textSize(25);
+          text("Place your hands on the bar with palms touching the front electrode and tips of the fingers touching the back electrode. Your ECG will be displayed on the graph above, to find an accurate Beats Per Minute (BPM), hold the bar for 20 seconds. A detection algorithm is used to identify when the beats occur, highlighted in blue. Try jogging on the spot to increase your heart rate and watch the difference.", ECG_LEARNABOUTX-800/2, ECG_LEARNABOUTY, 900, 280);
+        }else{
+          textSize(18);
+          text("Place your hands on the bar with palms touching the front electrode and tips of the fingers touching the back electrode. Your ECG will be displayed on the graph above, to find an accurate Beats Per Minute (BPM), hold the bar for 20 seconds. A detection algorithm is used to identify when the beats occur, highlighted in blue. Try jogging on the spot to increase your heart rate and watch the difference.", ECG_LEARNABOUTX-800/2, ECG_LEARNABOUTY, 800, 220);
+        }
+          
+        
+        
         
         if(ECGOpen){
           textSize(38);

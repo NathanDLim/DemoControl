@@ -86,7 +86,7 @@ public class FlappyRaven{
             bars.get(i).update();
             if(!bars.get(i).checkBounds()){
               bars.remove(i);
-              difficulty = difficulty > 10? difficulty: difficulty+1;
+              difficulty = difficulty > 10*SCALING? difficulty: difficulty+1;
               score++;
             }
             
@@ -128,11 +128,11 @@ public class FlappyRaven{
      * Makes a new bar at the x location. The size of the gap is a function of difficulty, the position of the gap is a random distribution
      */
     private Bar makeBar(int x){
-      int size = 300-difficulty*12;
+      int size = int((300-difficulty*12)*SCALING);
       int pos = (int)r.nextInt(((yLen)-size-bgGroundLevel-5));
       
-      if(pos<25) pos = 25;
-      if(pos > (yLen-size-65)) pos = yLen-size-bgGroundLevel-int(5*SCALING);
+      if(pos<25*SCALING) pos = int(25*SCALING);
+      if(pos > (yLen-size-int(40*SCALING))) pos = yLen-size-bgGroundLevel-int(40*SCALING);
       return new Bar(x,size,pos);
     }
     
@@ -212,7 +212,7 @@ public class FlappyRaven{
       
       
       fill(40);
-      ellipse(-12,0,25*SCALING,(accel*8/3 -4)*SCALING); //wing. using the current accel makes it look like it is flapping
+      ellipse(-10*SCALING,0,25*SCALING,(accel*8/3 -4)*SCALING); //wing. using the current accel makes it look like it is flapping
       popMatrix();
       
       
@@ -273,7 +273,7 @@ public class FlappyRaven{
       rect(start,flappyY+breakPosition+breakSize,size, yLen - (breakPosition+breakSize) - 40*SCALING); 
       
       //tube openings
-      rect(start-10,flappyY+breakPosition-20,(size + 20),20*SCALING);
+      rect(start-10,flappyY+breakPosition-20*SCALING,(size + 20),20*SCALING);
       rect(start-10,flappyY+breakPosition+breakSize,(size + 20),20*SCALING); 
     }
     
@@ -291,9 +291,9 @@ public class FlappyRaven{
     
     //checks if the bar collides with the bird
     public boolean collision(Bird b){
-      if(b.getX() + 17 >= x && b.getX() - 17 < x + barWidth){
+      if(b.getX() + 17*SCALING >= x && b.getX() - 17*SCALING < x + barWidth){
           
-        if(!(b.getY() - 15 > flappyY+breakPosition && b.getY() + 15 < flappyY+breakPosition+breakSize))
+        if(!(b.getY() - 15*SCALING > flappyY+breakPosition && b.getY() + 15*SCALING < flappyY+breakPosition+breakSize))
          return true;
       }
       

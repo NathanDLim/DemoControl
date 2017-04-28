@@ -8,22 +8,25 @@ Serial myPort;
 static final int TIMEOUT = 60*240; //How long the application should wait with no interaction before closing. 60 frames per second * 240 seconds (3 minutes)
 int timer; //counter for timeout
 
-final static boolean Debug = false; //Debug should be true when no arduino is attached
-final static boolean portraitMode = false; //Portrait mode is set to false to launch in Lansdcape mode
+static final int FIRST_CONTACT_TIMEOUT = 60*5; //How long the application should wait without a response from the Arduino
 
+boolean firstContact;
+
+final static boolean Debug = true; //Debug should be true when no arduino is attached
+final static boolean portraitMode = false; //Portrait mode is set to false to launch in Lansdcape mode
 final static float SCALING = 1; //scaling should be '1', when in landscape, '2' when in portrait for the big sreen.
 
 public void settings() {
   fullScreen();
 
-  
+  firstContact = Debug == true; //only try to establish contact if we are not in debug mode
   timer = 0;
   
-  if(myPort.list().length >= 3){
+  if(myPort.list().length >= 1){
     myPort = new Serial(this, myPort.list()[myPort.list().length - 1], 9600); 
     myPort.bufferUntil('\n'); 
     delay(100);
-    myPort.write("NONE");
+    myPort.write("A");
   }else{
     println("No Arduino Connected");
     if(!Debug) //If not in debug mode, then arduino should be connected to work
@@ -32,14 +35,22 @@ public void settings() {
   }
 
   controller = new DisplayController(myPort);
+  
+  
+  //myPort.write("A");
 }
 
 void draw(){
 
   timer++;
-  if (timer >= TIMEOUT){
+  if(!firstContact && timer >= FIRST_CONTACT_TIMEOUT){
+    myPort.stop();
+    exit();
+  }
+  else if (timer >= TIMEOUT){
     myPort.write("NONE");
     myPort.clear(); 
+    myPort.stop();
     exit();
   }
   
@@ -47,7 +58,8 @@ void draw(){
 }
 
 void mouseReleased(){
- timer= 0; //reset timer when mouse is clicked & released
+ if(firstContact)
+   timer= 0; //reset timer when mouse is clicked & released
  controller.buttonCheck();
 }
 
@@ -58,13 +70,22 @@ void keyPressed(){
 
 
 void mouseMoved(){
- timer = 0;  //reset timer when mouse is moved
+  if(firstContact)
+   timer = 0;  //reset timer when mouse is moved
 }
 
 void serialEvent (Serial myPort) {
-  // get the ASCII string:
   String inString = myPort.readStringUntil('\n');
-  controller.update(inString);
+
+  //This makes sure the arduino has been found. If we get an expected response, we know we have been connected
+  if(!firstContact){
+     if(inString.substring(0,1).equals("A")){
+       firstContact = true;
+       timer = 0;
+       controller.foundArduino(); 
+     }
+  }else
+    controller.update(inString);
 }
 
 /*
@@ -139,8 +160,11 @@ public class DisplayController{
   boolean ECGOpen;
   
   public DisplayController(Serial port){
+    if(Debug)
+      currentScreen = DisplayScreen.NONE;
+    else
+      currentScreen = DisplayScreen.ARUINO_CHECK;
     
-    currentScreen = DisplayScreen.NONE;
     heartImg = loadImage("heart3.png");
     heartImg.resize(0,int(300*SCALING));
     muscleImg = loadImage("muscle.png");
@@ -288,6 +312,11 @@ public class DisplayController{
     
     switch(currentScreen){
 
+      case ARUINO_CHECK:
+        textSize(50);
+        text("Scanning for Arduino",displayWidth/2,displayHeight/2);
+        break;
+      
       //This is the starting screen, two options, EMG or ECG
       case NONE:
         //fill(0xff,200);
@@ -611,6 +640,11 @@ public class DisplayController{
         }
         break;
     }
+
   }
+  
+  void foundArduino(){
+        switchTo(DisplayScreen.NONE);
+    }
   
 }

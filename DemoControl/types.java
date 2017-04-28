@@ -6,6 +6,7 @@ enum TriggerType{
 };
 
 enum DisplayScreen{
+    ARUINO_CHECK,
     NONE,
     EMG,
     EMG_DEMO,

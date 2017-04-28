@@ -5,7 +5,7 @@
  */
  
  
-final static boolean hideNumbers = false;
+final static boolean hideNumbers = true;
  
 class BarGraph{
   String title;

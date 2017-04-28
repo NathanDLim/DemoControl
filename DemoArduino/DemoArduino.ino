@@ -201,31 +201,37 @@ void loop()
   if (Serial.available())
   {
     String s = Serial.readString();
-    switch (currMode) {
-      case NONE:
-        if (s.equals("EMG")) {
-          currMode = EMG;
-          threshold = 200.0;
-          enableRead(true);
-        } else if (s.equals("ECG")) {
-          currMode = ECG;
-          enableRead(true);
-        }
-        break;
-      case ECG:
-        if (s.equals("NONE")) {
-          currMode = NONE;
-          enableRead(false);
-        }
-      case EMG:
-        if (s.equals("NONE")) {
-          currMode = NONE;
-          enableRead(false);
-        } else if (s.substring(0, 6).equals("THRSH:")) {
-          threshold = s.substring(6).toFloat();
-        }
+    if(s.equals("A")){
+      currMode = NONE;
+      delay(500);
+      Serial.println("A");
+    }else{
+      switch (currMode) {
+        case NONE:
+          if (s.equals("EMG")) {
+            currMode = EMG;
+            threshold = 200.0;
+            enableRead(true);
+          } else if (s.equals("ECG")) {
+            currMode = ECG;
+            enableRead(true);
+          }
+          break;
+        case ECG:
+          if (s.equals("NONE")) {
+            currMode = NONE;
+            enableRead(false);
+          }
+        case EMG:
+          if (s.equals("NONE")) {
+            currMode = NONE;
+            enableRead(false);
+          } else if (s.substring(0, 6).equals("THRSH:")) {
+            threshold = s.substring(6).toFloat();
+          }
+      }
+      Serial.println(currMode);
     }
-    Serial.println(currMode);
   }
 
 

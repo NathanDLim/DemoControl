@@ -96,7 +96,7 @@ public class FlappyRaven{
               gameOver();
         
         bird.update();
-        if(bird.getY() > (flappyY+yLen)-bgGroundLevel)
+        if(bird.getY() > (flappyY+yLen)- int(bgGroundLevel*SCALING))
            gameOver();
         
         td.update("Score: " + score);
@@ -132,7 +132,7 @@ public class FlappyRaven{
       int pos = (int)r.nextInt(((yLen)-size-bgGroundLevel-5));
       
       if(pos<25*SCALING) pos = int(25*SCALING);
-      if(pos > (yLen-size-int(40*SCALING))) pos = yLen-size-bgGroundLevel-int(40*SCALING);
+      if(pos > (yLen-size-int(50*SCALING))) pos = yLen-size-bgGroundLevel-int(50*SCALING);
       return new Bar(x,size,pos);
     }
     
@@ -180,8 +180,8 @@ public class FlappyRaven{
     // This increases acceleration towards the ground up to a maximum
     public void update(){
       y += accel;
-      if(y < flappyY+20)
-        y = flappyY+20;
+      if(y < flappyY+int(20*SCALING))
+        y = flappyY+int(20*SCALING);
       accel = accel > 3*SCALING? accel: accel + 0.07*SCALING;
     }
     
@@ -279,7 +279,7 @@ public class FlappyRaven{
     
     //This function changes the x position of the bar, moving them leftwards 
     public void update(){
-      x = x- int(1.5*SCALING);
+      x = x - int(2*SCALING);
     }
     
     // This checks if the bar has left the screen

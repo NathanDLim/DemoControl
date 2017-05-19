@@ -12,8 +12,8 @@ static final int FIRST_CONTACT_TIMEOUT = 60*5; //How long the application should
 
 boolean firstContact;
 
-final static boolean Debug = false; //Debug should be true when no arduino is attached
-final static boolean portraitMode = false; //Portrait mode is set to false to launch in Lansdcape mode
+final static boolean Debug = true; //Debug should be true when no arduino is attached
+final static boolean portraitMode = true; //Portrait mode is set to false to launch in Lansdcape mode
 final static float SCALING = 1; //scaling should be '1', when in landscape, '2' when in portrait for the big sreen.
 
 public void settings() {
@@ -36,8 +36,6 @@ public void settings() {
 
   controller = new DisplayController(myPort);
   
-  
-  //myPort.write("A");
 }
 
 void draw(){
@@ -114,10 +112,10 @@ public class DisplayController{
   int EMG_DEMOY = displayHeight*3/4;
   int ECG_DEMOX = displayWidth/2;
   int ECG_DEMOY = displayHeight*3/4;
-  int RETURNX = displayWidth-int(80*SCALING);
-  int RETURNY = displayHeight*3/4-100;
-  int HOMEX = displayWidth-int(80*SCALING);
-  int HOMEY = displayHeight*3/4-int(150*SCALING);
+  int RETURNX = displayWidth/2+int(80*SCALING);
+  int RETURNY = displayHeight*3/4;
+  int HOMEX = displayWidth/2-int(80*SCALING);
+  int HOMEY = displayHeight*3/4;
   
   int FLAPPYX = int(displayWidth - 1000*SCALING)/2;
   int FLAPPYY = int(displayHeight - 500*SCALING)*2/5;
@@ -322,8 +320,8 @@ public class DisplayController{
         //fill(0xff,200);
         
         fill(0xff,180);
-        if(!portraitMode)
-          ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
+        //if(!portraitMode)
+        ellipse(RETURNX, RETURNY, BUTTONSIZE_2, BUTTONSIZE_2);
         strokeWeight(0);        
         rect(displayWidth*0.08, displayHeight*0.13, displayWidth*0.84, displayHeight*0.8, 250);
         strokeWeight(3);
@@ -541,7 +539,7 @@ public class DisplayController{
         
         if(ECGOpen){
           textSize(38);
-          text("Place your hands on the bar to display your ECG",width/2,height*3/5-200);
+          text("Place your hands on the bar to display your ECG",displayWidth/2,displayHeight*3/5-200);
         }
         
         break;
@@ -620,7 +618,7 @@ public class DisplayController{
           switchTo(DisplayScreen.ECG);          
         }
         else if((mouseX-RETURNX)*(mouseX-RETURNX) + (mouseY- RETURNY)*(mouseY- RETURNY) <= BUTTONSIZE_2/2*BUTTONSIZE_2/2){
-          if(!portraitMode)
+          //if(!portraitMode)
             exit();
         }
         break;
